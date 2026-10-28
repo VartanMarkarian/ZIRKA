@@ -186,10 +186,10 @@ def stars_front():
     return (f'<g transform="translate(0 {AX})">'
             f'<line class="rope-b" x1="-320" y1="0" x2="-320" y2="{-1100 - AX}"/>'
             f'<line class="rope-b" x1="320" y1="0" x2="320" y2="{-1100 - AX}"/>'
-            f'<g class="spin-big"><use class="u-big" href="#big-v1"/></g>'
+            f'<g class="spin-big"><use class="u-big" href="#big-v2"/></g>'
             f'<line class="rope-s" x1="-220" y1="0" x2="-220" y2="{-1100 - AX}"/>'
             f'<line class="rope-s" x1="220" y1="0" x2="220" y2="{-1100 - AX}"/>'
-            f'<g class="spin-small"><use class="u-small" href="#small-s1"/></g></g>')
+            f'<g class="spin-small"><use class="u-small" href="#small-s3"/></g></g>')
 
 
 front = (f'<svg viewBox="-3500 -6650 6900 7200" class="dwg" role="img" aria-label="Фасад інсталяції з розмірами">'
@@ -300,7 +300,7 @@ cnc_big = (f'<svg viewBox="-170 -170 {SHEET_W + 230} {SHEET_H + 320}" class="dwg
            f'aria-label="Розкладка двох чвертей на листі 1220×2440">'
            f'<rect class="sheet" x="0" y="0" width="{SHEET_W}" height="{SHEET_H}"/>'
            f'<rect class="used" id="nest-used" x="0" y="0" width="{SHEET_W}" height="{SHEET_H}"/>'
-           f'<use id="nest-a" href="#q-v1"/><use id="nest-b" href="#q-v1"/>'
+           f'<use id="nest-a" href="#q-v2"/><use id="nest-b" href="#q-v2"/>'
            + dim_h(-70, 0, SHEET_W, "1220", fs=60) + dim_v(-70, 0, SHEET_H, str(SHEET_H), side=-1, fs=60)
            + f'<text class="dt" id="nest-label" x="{SHEET_W / 2}" y="{SHEET_H + 110}" font-size="52" '
              f'text-anchor="middle"></text></svg>')
@@ -353,9 +353,9 @@ mont.append(f'<g class="m-glow"><circle fill="url(#glow)" cx="{ax[0]:.1f}" cy="{
 for dx, cls in ((-320, 'rope-b'), (320, 'rope-b')):
     mont.append(f'<line class="{cls} m-rope" x1="{ax[0] + dx * S:.1f}" y1="{ax[1]:.1f}" x2="{ax[0] + dx * S:.1f}" y2="{CY - 260 * S:.1f}"/>')
 mont.append(f'<g transform="translate({ax[0]:.1f} {ax[1]:.1f}) scale({S:.5f})">'
-            f'<g class="spin-big"><use class="u-big" href="#big-v1"/></g>'
+            f'<g class="spin-big"><use class="u-big" href="#big-v2"/></g>'
             f'<line class="rope-s" x1="-220" y1="0" x2="-220" y2="3540"/><line class="rope-s" x1="220" y1="0" x2="220" y2="3540"/>'
-            f'<g class="spin-small"><use class="u-small" href="#small-s1"/></g></g>')
+            f'<g class="spin-small"><use class="u-small" href="#small-s3"/></g></g>')
 for p, cls in ((FR, 'wh-b'), (FR2, 'wh-s')):
     wy = p[1] - 350 * S
     mont.append(f'<line class="m-rope rope-{"b" if cls == "wh-b" else "s"}" x1="{CX:.1f}" y1="{CY - 260 * S:.1f}" x2="{p[0]:.1f}" y2="{wy:.1f}"/>')

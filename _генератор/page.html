@@ -15,7 +15,7 @@
   --f-display:"Yeseva One", Georgia, "Times New Roman", serif;
   --f-body:"IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
   --f-mono:"IBM Plex Mono", Consolas, "Courier New", monospace;
-  --p-big:#e0a21b; --p-big-rim:#1b1712; --p-small:#1b1712; --p-small-rim:#f2c230; --p-acc:#6f8f3a;
+  --p-big:#1f3d8f; --p-big-rim:#f2b632; --p-small:#f2b632; --p-small-rim:#c3262e; --p-acc:#fff6e0;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#0d1230; --panel:#151c44; --ink:#e7e9f4; --muted:#9aa2c8; --line:#2b3466;
@@ -173,8 +173,8 @@ ul.plain{margin:0;padding-left:1.1em;display:grid;gap:8px}
         <svg viewBox="-1330 -1330 2660 2660" id="stage-svg" role="img" aria-label="Дві зірки, що обертаються">
           <use href="#post-deco" transform="translate(0 3650)"/>
           <circle r="1450" fill="url(#glow)"/>
-          <g class="spin-big"><use class="u-big" href="#big-v1"/></g>
-          <g class="spin-small"><use class="u-small" href="#small-s1"/></g>
+          <g class="spin-big"><use class="u-big" href="#big-v2"/></g>
+          <g class="spin-small"><use class="u-small" href="#small-s3"/></g>
         </svg>
         <div class="tools"><button class="btn" id="b-auto" type="button">Пауза</button></div>
         <div class="hint">Зірки обертаються перетягуванням: центр — передня, край — велика.</div>
@@ -376,13 +376,13 @@ function lightsSVG(){
   return `<g id="post-lights">${s}</g>`;
 }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const st = {big:'v1', small:'s1', pal:'ochre', D:BASE_D, post:'dots', lights:false, aB:0, aS:0, vB:0, vS:0, auto:!reduce, drag:null};
+const st = {big:'v2', small:'s3', pal:'indigo', D:BASE_D, post:'dots', lights:true, aB:0, aS:0, vB:0, vS:0, auto:!reduce, drag:null};
 const AUTO_B = 7, AUTO_S = -11; // градусів за секунду
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const fmt = (x, d=1) => Number(x).toLocaleString('uk-UA', {maximumFractionDigits:d, minimumFractionDigits:d});
 
-function load(){ try{ const s = JSON.parse(localStorage.getItem('zirka') || '{}'); ['big','small','pal','D','post'].forEach(k => { if (s[k]) st[k] = s[k]; }); if (typeof s.lights === 'boolean') st.lights = s.lights; if (!POSTS[st.post]) st.post = 'dots'; if (!PALS[st.pal]) st.pal = 'ochre'; }catch(e){} }
-function save(){ try{ localStorage.setItem('zirka', JSON.stringify({big:st.big, small:st.small, pal:st.pal, D:st.D, post:st.post, lights:st.lights})); }catch(e){} }
+function load(){ try{ const s = JSON.parse(localStorage.getItem('zirka-v2') || '{}'); ['big','small','pal','D','post'].forEach(k => { if (s[k]) st[k] = s[k]; }); if (typeof s.lights === 'boolean') st.lights = s.lights; if (!POSTS[st.post]) st.post = 'dots'; if (!PALS[st.pal]) st.pal = 'indigo'; }catch(e){} }
+function save(){ try{ localStorage.setItem('zirka-v2', JSON.stringify({big:st.big, small:st.small, pal:st.pal, D:st.D, post:st.post, lights:st.lights})); }catch(e){} }
 
 const NS = 'http://www.w3.org/2000/svg';
 function dimV(x, y1, y2, label){
