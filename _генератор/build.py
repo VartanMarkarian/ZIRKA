@@ -374,5 +374,11 @@ out = (tpl.replace("%%DEFS%%", defs).replace("%%MONTAGE%%", montage).replace("%%
        .replace("%%NEST%%", json.dumps(NEST, ensure_ascii=False)))
 dst = os.path.join(PROJ, "zirka-eskiz.html")
 open(dst, "w", encoding="utf-8").write(out)
+# окрема повна сторінка для GitHub Pages: свій doctype, viewport і базовий скид стилів
+page = ('<!doctype html>\n<html lang="uk">\n<head>\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+        '<style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);'
+        'padding-bottom:env(safe-area-inset-bottom,0px)}</style>\n' + out + '\n</html>\n')
+open(os.path.join(PROJ, "index.html"), "w", encoding="utf-8").write(page)
 print("html", len(out) // 1024, "KB")
 print(sorted(os.listdir(CNC)))
