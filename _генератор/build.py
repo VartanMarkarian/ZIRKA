@@ -11,8 +11,8 @@ if os.path.isdir(CNC):
     shutil.rmtree(CNC)
 os.makedirs(CNC)
 
-LAT = {'v1': 'roza', 'v2': 'kolosok', 'v3': 'sontse', 'v4': 'modern', 'v5': 'kryn', 'v6': 'vykhor',
-       's1': 'iskra', 's2': 'kvitka', 's3': 'siaivo', 's4': 'vykhrova', 's5': 'tiulpan'}
+LAT = {'v1': 'roza', 'v2': 'kolosok', 'v3': 'sontse', 'v4': 'modern', 'v5': 'kryn', 'v6': 'vykhor', 'v7': 'vezha', 'v8': 'plakhta',
+       's1': 'iskra', 's2': 'kvitka', 's3': 'siaivo', 's4': 'vykhrova', 's5': 'tiulpan', 's6': 'vikontse', 's7': 'ruzha'}
 SHEET_W, SHEET_H = 1220, 2440
 BASE_D = 2400
 

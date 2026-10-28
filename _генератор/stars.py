@@ -180,15 +180,33 @@ def whirl(x0, x1, b, d0, d1, n=28):
     return ('poly', left + right[::-1][1:-1])
 
 
+def window(x0, x1, b):
+    """Вікно українського модерну: трапеція, що звужується назовні, зі зрізаними верхніми кутами."""
+    L = x1 - x0
+    up = [(x0, b), (x1 - 0.24 * L, 0.74 * b), (x1, 0.44 * b)]
+    return ('poly', up + [(x, -y) for x, y in reversed(up)])
+
+
+def steprh(x0, x1, b, k=3):
+    """Ступінчастий ромб, як у плахті чи килимі."""
+    xc, dx, dy = (x0 + x1) / 2, (x1 - x0) / 2 / k, b / k
+    up = []
+    for i in range(k):
+        up += [(x0 + i * dx, (i + 1) * dy), (x0 + (i + 1) * dx, (i + 1) * dy)]
+    upper = up + [(2 * xc - x, y) for x, y in reversed(up[:-1])]
+    return ('poly', upper + [(x, -y) for x, y in reversed(upper)])
+
+
 MOTIFS = {'rhombus': rhombus, 'lens': lens, 'drop': lambda x0, x1, b: drop(x0, x1, b, True),
           'dropin': lambda x0, x1, b: drop(x0, x1, b, False), 'dot': dot,
-          'trap': trap, 'hexa': hexa, 'tri': tri, 'triin': triin, 'tulip': tulip}
+          'trap': trap, 'hexa': hexa, 'tri': tri, 'triin': triin, 'tulip': tulip,
+          'window': window, 'steprh': steprh}
 
 
 # ---------- зірка
 class Star:
     def __init__(self, key, name, N, R, r_in, profile=(), alt=None, axle=30,
-                 margin=40, seam_margin=55, r_clear=0, motifs=None, split4=False, extra=None):
+                 margin=40, seam_margin=55, r_clear=0, motifs=None, split4=False, extra=None, strict=False):
         self.key, self.name, self.N, self.R, self.r_in = key, name, N, R, r_in
         self.profile = profile          # [(t, s)] — точки між западиною і вершиною
         self.alt = alt                  # радіус коротких променів (через один)
@@ -197,6 +215,7 @@ class Star:
         self.motifs = motifs or {}      # {'long': [...], 'short': [...]}
         self.extra = extra
         self.split4 = split4
+        self.strict = strict            # уступи в контурі: перемичку міряти й уздовж променя
         self.half = math.pi / N
         self.warn = []
         self.build()
@@ -217,12 +236,17 @@ class Star:
 
     def hf(self, x, Rk, m_ray, m_seam):
         """Допустима напівширина отвору в точці x з урахуванням перемички."""
+        if self.strict:
+            return min(self._hf(x + d, Rk, m_ray, m_seam) for d in (-m_ray, -m_ray / 2, 0, m_ray / 2, m_ray))
+        return self._hf(x, Rk, m_ray, m_seam)
+
+    def _hf(self, x, Rk, m_ray, m_seam):
         hp = self.half_profile(Rk)
         xv = hp[0][0]
         if x < xv:
             return x * math.tan(self.half) - m_seam / math.cos(self.half)
         for (xa, ya), (xb, yb) in zip(hp, hp[1:]):
-            if xa <= x <= xb:
+            if xa <= x <= xb and xb > xa:
                 y = ya + (yb - ya) * (x - xa) / (xb - xa)
                 slope = abs(yb - ya) / (xb - xa)
                 return y - m_ray * math.sqrt(1 + slope * slope)

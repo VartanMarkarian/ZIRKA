@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1198mm" height="1198mm" viewBox="0 0 1198 1198">
+<title>Велика зірка «Вежа» Ø2480, 1/4, фанера 10 мм, різати 4 шт</title>
+<rect x="0" y="0" width="1198" height="1198" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="20 10"/>
+<path d="M578.7 0L848.1 99.6L961.8 201.7L1197.7 320.9L933.8 306.2L784.3 337.8L501.1 289.3L684.7 510.3L732 655.6L876.8 876.8L655.6 732L510.3 684.7L289.3 501.1L337.8 784.3L306.2 933.8L320.9 1197.7L201.7 961.8L99.6 848.1L0 578.7L0 31L4 30.7L8 29.9L11.9 28.6L15.5 26.8L18.9 24.6L21.9 21.9L24.6 18.9L26.8 15.5L28.6 11.9L29.9 8L30.7 4L31 0Z" fill="none" stroke="#000" stroke-width="0.5"/>
+<path d="M289.5 77.6L350.3 51.7L429.4 72.8L469.1 125.7L408.3 151.6L329.2 130.4Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="519" cy="139.1" r="22.7" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M565.1 266.7L724.3 279.4L780.8 260L806.2 165.3L766.9 120.2L622.7 51.5Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M828.4 222L892.2 183.7L928.3 248.7L864.5 287.1Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M211.9 211.9L277.5 219.9L335.4 277.8L343.4 343.4L277.8 335.4L219.9 277.5Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="380" cy="380" r="22.7" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M356 513.5L487.5 604.1L546.2 615.5L615.5 546.2L604.1 487.5L513.5 356Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M606.5 606.5L680.8 605.1L679.5 679.5L605.1 680.8Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M77.6 289.5L130.4 329.2L151.6 408.3L125.7 469.1L72.8 429.4L51.7 350.3Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="139.1" cy="519" r="22.7" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M51.5 622.7L120.2 766.9L165.3 806.2L260 780.8L279.4 724.3L266.7 565.1Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M222 828.4L287.1 864.5L248.7 928.3L183.7 892.2Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+</svg>
