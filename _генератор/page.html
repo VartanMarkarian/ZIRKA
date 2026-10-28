@@ -302,7 +302,12 @@ const INFO = {
   v3:{n:'Сонце', d:'<b>20 променів з увігнутими гранями.</b> Широкий диск у центрі стає тлом для передньої зірки, прорізи йдуть вінком: горошок, ромби, довгі листки.'},
   s1:{n:'Іскра', d:'<b>16 гострих променів</b>, довкола осі віночок із 16 крапель.'},
   s2:{n:'Квітка', d:'<b>10 опуклих променів-пелюсток</b> з ромбами. Тут найбільше прорізів.'},
-  s3:{n:'Сяйво', d:'<b>24 промені (12 + 12)</b> з тонкими листками. Під час обертання мерехтить найсильніше.'}
+  s3:{n:'Сяйво', d:'<b>24 промені (12 + 12)</b> з тонкими листками. Під час обертання мерехтить найсильніше.'},
+  v4:{n:'Модерн', d:'<b>12 променів зі сходинкою.</b> Мотиви українського архітектурного модерну, як на будинку Полтавського земства: трапеції біля основи променів, видовжені шестикутники й горошок у центрі.'},
+  v5:{n:'Крин', d:'<b>12 широких променів.</b> У кожному промені й у центрі крин-тюльпан з розкритими бічними пелюстками, мотив, поширений у полтавському різьбленні й майоліці; між ними горошок.'},
+  v6:{n:'Вихор', d:'<b>12 променів.</b> У центрі вихрова розетка із серпів, у променях ланцюжки трикутних виїмок, як у виїмчастому різьбленні по дереву. Під час обертання вихор ніби закручується.'},
+  s4:{n:'Вихрова', d:'<b>12 променів</b> з вихровою розеткою довкола осі й трикутними виїмками.'},
+  s5:{n:'Тюльпан', d:'<b>10 опуклих променів</b> з кринами й віночком крапель довкола осі.'}
 };
 const PALS = {
   ochre:{n:'Охра й чорний', big:'#e0a21b', bigRim:'#1b1712', small:'#1b1712', smallRim:'#f2c230', acc:'#6f8f3a'},
@@ -313,7 +318,7 @@ const PALS = {
   sun:{n:'Святкова жовта', big:'#f2b632', bigRim:'#b3202a', small:'#b3202a', smallRim:'#fff4dc', acc:'#1f3d8f'},
   white:{n:'Біла з червоним', big:'#f3eee4', bigRim:'#b3202a', small:'#b3202a', smallRim:'#1f3d8f', acc:'#f2b632'}
 };
-const LAT = {v1:'roza',v2:'kolosok',v3:'sontse',s1:'iskra',s2:'kvitka',s3:'siaivo'};
+const LAT = {v1:'roza',v2:'kolosok',v3:'sontse',v4:'modern',v5:'kryn',v6:'vykhor',s1:'iskra',s2:'kvitka',s3:'siaivo',s4:'vykhrova',s5:'tiulpan'};
 const POSTS = {
   wood:{n:'Дерево', d:'Брус просочений олією або морилкою під горіх. Найпростіший варіант, але ввечері колода майже не помітна.'},
   dots:{n:'Пуантилізм', d:'Колода вкрита крапками чистих кольорів зірок по чорному ґрунту. Унизу більше темних і зелених, вгорі більше жовтих і золотих, тож колір ніби піднімається до зірки. Крапки Ø20–40 мм ставлять штампами: пробками, круглими губками або торцями дюбелів. Це можна зробити майстер-класом, де кожен учасник ходи ставить свою крапку.'},
@@ -444,8 +449,8 @@ function chip(group, key, label, sub, icon){
 function starIcon(id, cls, R){ return `<svg viewBox="${-R} ${-R} ${2*R} ${2*R}" aria-hidden="true"><use class="${cls}" href="#${id}"/></svg>`; }
 
 function build(){
-  ['v1','v2','v3'].forEach(k => $('#pick-big').append(chip('big', k, INFO[k].n, STATS[k].rays + ' пром.', starIcon('big-'+k, 'u-big', 1210))));
-  ['s1','s2','s3'].forEach(k => $('#pick-small').append(chip('small', k, INFO[k].n, STATS[k].rays + ' пром.', starIcon('small-'+k, 'u-small', 605))));
+  Object.keys(STATS).filter(k => k[0] === 'v').forEach(k => $('#pick-big').append(chip('big', k, INFO[k].n, STATS[k].rays + ' пром.', starIcon('big-'+k, 'u-big', 1210))));
+  Object.keys(STATS).filter(k => k[0] === 's').forEach(k => $('#pick-small').append(chip('small', k, INFO[k].n, STATS[k].rays + ' пром.', starIcon('small-'+k, 'u-small', 605))));
   Object.entries(PALS).forEach(([k,p]) => $('#pick-pal').append(chip('pal', k, p.n, '', `<span class="sw"><i style="background:${p.big}"></i><i style="background:${p.bigRim}"></i><i style="background:${p.small}"></i></span>`)));
   setSvgHTML($('#post-kinds'), Object.keys(POSTS).map(postSVG).join('') + lightsSVG());
   Object.entries(POSTS).forEach(([k,p]) => $('#pick-post').append(chip('post', k, p.n, '',

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1198mm" height="1198mm" viewBox="0 0 1198 1198">
+<title>Велика зірка «Модерн» Ø2480, 1/4, фанера 10 мм, різати 4 шт</title>
+<rect x="0" y="0" width="1198" height="1198" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="20 10"/>
+<path d="M620 0L809.4 85.8L804.5 128.8L1197.7 320.9L761.1 290.8L743.9 330.4L536.9 310L658 479L632.4 513.8L876.8 876.8L513.8 632.4L479 658L310 536.9L330.4 743.9L290.8 761.1L320.9 1197.7L128.8 804.5L85.8 809.4L0 620L0 31L4 30.7L8 29.9L11.9 28.6L15.5 26.8L18.9 24.6L21.9 21.9L24.6 18.9L26.8 15.5L28.6 11.9L29.9 8L30.7 4L31 0Z" fill="none" stroke="#000" stroke-width="0.5"/>
+<path d="M284.5 76.2L340.5 51.7L412.9 71.1L449.2 120.4L393.2 144.9L320.7 125.5Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="501.6" cy="134.4" r="24.8" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M640.4 45.5L775.9 138.6L741.2 267.9L577.3 280.7Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M808.5 216.6L856.4 205.5L922.3 223.1L958.2 256.7L910.3 267.9L844.4 250.3Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M208.2 208.2L269 215L322.1 268L328.8 328.8L268 322.1L215 269Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="367.2" cy="367.2" r="24.8" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M531.8 359.6L602.7 508L508 602.7L359.6 531.8Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M591.8 591.8L638.9 606.1L687.2 654.4L701.4 701.4L654.4 687.2L606.1 638.9Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M76.2 284.5L125.5 320.7L144.9 393.2L120.4 449.2L71.1 412.9L51.7 340.5Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="134.4" cy="501.6" r="24.8" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M280.7 577.3L267.9 741.2L138.6 775.9L45.5 640.4Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M216.6 808.5L250.3 844.4L267.9 910.3L256.7 958.2L223.1 922.3L205.5 856.4Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+</svg>

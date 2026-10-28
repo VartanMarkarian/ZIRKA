@@ -129,8 +129,60 @@ def slot(p1, p2, w, n=8):
     return ('poly', pts)
 
 
+# ---------- мотиви українського модерну й різьблення
+def trap(x0, x1, b):
+    """Трапеція, ширша до центру."""
+    return ('poly', [(x0, -b), (x1, -0.55 * b), (x1, 0.55 * b), (x0, b)])
+
+
+def hexa(x0, x1, b):
+    """Видовжений шестикутник."""
+    a = x1 - x0
+    return ('poly', [(x0, 0), (x0 + 0.28 * a, -b), (x1 - 0.28 * a, -b), (x1, 0), (x1 - 0.28 * a, b), (x0 + 0.28 * a, b)])
+
+
+def tri(x0, x1, b):
+    """Трикутна виїмка вершиною назовні."""
+    return ('poly', [(x0, -b), (x1, 0), (x0, b)])
+
+
+def triin(x0, x1, b):
+    """Трикутна виїмка вершиною до центру."""
+    return ('poly', [(x1, -b), (x1, b), (x0, 0)])
+
+
+# крин (тюльпан): ніжка біля x0, середня пелюстка до x1, бічні пелюстки розходяться
+TULIP = [(0, -0.20), (0.16, -0.20), (0.22, -0.50), (0.32, -0.82), (0.46, -1.0), (0.60, -0.96),
+         (0.50, -0.74), (0.44, -0.46), (0.60, -0.44), (0.80, -0.34), (0.94, -0.17), (1.0, 0)]
+
+
+def tulip(x0, x1, b):
+    L = x1 - x0
+    lower = [(x0 + u * L, v * b) for u, v in TULIP]
+    upper = [(x, -y) for x, y in reversed(lower[:-1])]
+    return ('poly', lower + upper)
+
+
+def whirl(x0, x1, b, d0, d1, n=28):
+    """Серп вихрової розетки: дуга від (x0, -d0) до (x1, d1), найтовща посередині."""
+    P0, P1, P2 = (x0, -d0), ((x0 + x1) / 2 + 0.1 * (x1 - x0), -1.2 * d0), (x1, d1)
+    left, right = [], []
+    for i in range(n + 1):
+        t = i / n
+        cx = (1 - t) ** 2 * P0[0] + 2 * (1 - t) * t * P1[0] + t * t * P2[0]
+        cy = (1 - t) ** 2 * P0[1] + 2 * (1 - t) * t * P1[1] + t * t * P2[1]
+        dx = 2 * (1 - t) * (P1[0] - P0[0]) + 2 * t * (P2[0] - P1[0])
+        dy = 2 * (1 - t) * (P1[1] - P0[1]) + 2 * t * (P2[1] - P1[1])
+        L = math.hypot(dx, dy) or 1
+        w = b * math.sin(math.pi * t) ** 0.85
+        left.append((cx - dy / L * w, cy + dx / L * w))
+        right.append((cx + dy / L * w, cy - dx / L * w))
+    return ('poly', left + right[::-1][1:-1])
+
+
 MOTIFS = {'rhombus': rhombus, 'lens': lens, 'drop': lambda x0, x1, b: drop(x0, x1, b, True),
-          'dropin': lambda x0, x1, b: drop(x0, x1, b, False), 'dot': dot}
+          'dropin': lambda x0, x1, b: drop(x0, x1, b, False), 'dot': dot,
+          'trap': trap, 'hexa': hexa, 'tri': tri, 'triin': triin, 'tulip': tulip}
 
 
 # ---------- зірка
@@ -183,7 +235,11 @@ class Star:
         return True
 
     def fit_motif(self, kind, x0, x1, Rk, bmax, dy=0.0):
-        gen = MOTIFS[kind]
+        if kind.startswith('whirl:'):
+            d0, d1 = (float(v) for v in kind.split(':')[1:3])
+            gen = lambda a, c, b: whirl(a, c, b, d0, d1)
+        else:
+            gen = MOTIFS[kind]
         lo, hi = 0.0, bmax
         best = None
         for _ in range(30):

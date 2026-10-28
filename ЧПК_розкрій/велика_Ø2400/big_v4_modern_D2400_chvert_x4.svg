@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1160mm" height="1160mm" viewBox="0 0 1160 1160">
+<title>Велика зірка «Модерн» Ø2400, 1/4, фанера 10 мм, різати 4 шт</title>
+<rect x="0" y="0" width="1160" height="1160" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="20 10"/>
+<path d="M600 0L783.3 83.1L778.6 124.6L1159.1 310.6L736.6 281.4L719.9 319.7L519.6 300L636.8 463.6L612 497.2L848.5 848.5L497.2 612L463.6 636.8L300 519.6L319.7 719.9L281.4 736.6L310.6 1159.1L124.6 778.6L83.1 783.3L0 600L0 30L3.9 29.7L7.8 29L11.5 27.7L15 26L18.3 23.8L21.2 21.2L23.8 18.3L26 15L27.7 11.5L29 7.8L29.7 3.9L30 0Z" fill="none" stroke="#000" stroke-width="0.5"/>
+<path d="M275.3 73.8L329.5 50L399.6 68.8L434.7 116.5L380.5 140.2L310.3 121.4Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="485.4" cy="130.1" r="24" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M619.7 44.1L750.9 134.1L717.3 259.3L558.7 271.7Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M782.4 209.6L828.8 198.8L892.5 215.9L927.3 248.5L880.9 259.3L817.2 242.2Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M201.5 201.5L260.3 208L311.7 259.4L318.2 318.2L259.4 311.7L208 260.3Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="355.3" cy="355.3" r="24" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M514.7 348L583.2 491.6L491.6 583.2L348 514.7Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M572.8 572.8L618.3 586.6L665 633.2L678.8 678.8L633.2 665L586.6 618.3Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M73.8 275.3L121.4 310.3L140.2 380.5L116.5 434.7L68.8 399.6L50 329.5Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<circle cx="130.1" cy="485.4" r="24" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M271.7 558.7L259.3 717.3L134.1 750.9L44.1 619.7Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+<path d="M209.6 782.4L242.2 817.2L259.3 880.9L248.5 927.3L215.9 892.5L198.8 828.8Z" fill="none" stroke="#e00" stroke-width="0.5"/>
+</svg>
