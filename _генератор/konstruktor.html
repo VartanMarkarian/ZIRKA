@@ -1,0 +1,1305 @@
+<meta charset="utf-8">
+<title>Конструктор звізд</title>
+<script>/* спершу темна тема; світла — лише якщо її обрали перемикачем */ try{ document.documentElement.dataset.theme = localStorage.getItem('k-theme') === 'light' ? 'light' : 'dark'; }catch(e){ document.documentElement.dataset.theme = 'dark'; }</script>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arsenal:wght@700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Макет: майстерня звізд — тепла «дубова» сцена зі звіздою, праворуч вкладки налаштувань; далі орнаментальна смуга, викрійка, сцени й мотиви */
+:root{
+  --paper:#f4efe7; --panel:#fffcf7; --panel2:#ece3d6; --ink:#3a2417; --muted:#7d6a5c; --line:#e1d6c7;
+  --red:#a8232b; --ochre:#c3860f; --on-red:#fff8ee;
+  --stage1:#fffaf1; --stage2:#ead7b6; --stage-ink:#5b3a22; --stage-dot:rgba(160,105,35,.4); --stage-btn:rgba(255,250,240,.75); --stage-shadow:rgba(120,70,20,.28); --h1:#c06a12;
+  --f-display:"Arsenal", "Segoe UI", Arial, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --f-mono:"IBM Plex Mono", Consolas, "Courier New", monospace;
+  --face:#dcc59b; --rim:#8a5a2e; --edge:#4a2a12; --deco:#c9a24a; --face2:#efe7d8; --rim2:#b0272d; --edge2:#5a1424;
+  --r-lg:20px; --r-md:14px; --shadow:0 1px 2px rgba(40,25,10,.06),0 8px 28px rgba(40,25,10,.08);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#241712; --panel:#311f18; --panel2:#3c271e; --ink:#f6ebdc; --muted:#c9b29c; --line:#4d3326;
+  --red:#e2585f; --ochre:#f0b33a; --on-red:#1a0f0b; --stage1:#7a2f25; --stage2:#2c1210; --stage-ink:#eadbc5; --stage-dot:rgba(255,235,200,.55); --stage-btn:rgba(20,12,8,.45); --stage-shadow:rgba(20,10,4,.55); --h1:#f0b33a; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#241712; --panel:#311f18; --panel2:#3c271e; --ink:#f6ebdc; --muted:#c9b29c; --line:#4d3326;
+  --red:#e2585f; --ochre:#f0b33a; --on-red:#1a0f0b; --stage1:#7a2f25; --stage2:#2c1210; --stage-ink:#eadbc5; --stage-dot:rgba(255,235,200,.55); --stage-btn:rgba(20,12,8,.45); --stage-shadow:rgba(20,10,4,.55); --h1:#f0b33a; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.55 var(--f-body);
+  background-image:radial-gradient(1200px 520px at 85% -10%,color-mix(in srgb,var(--ochre) 14%,transparent),transparent 70%),
+                   radial-gradient(900px 480px at -10% 30%,color-mix(in srgb,var(--red) 8%,transparent),transparent 70%)}
+[hidden]{display:none!important}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 72px;display:grid;gap:64px}
+h1,h2{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0;line-height:1.02;letter-spacing:-.01em}
+h1{font-size:clamp(2.8rem,7.5vw,5.8rem);color:var(--h1)}
+h1 em{font-style:normal;color:var(--red)}
+h2{font-size:clamp(1.8rem,3.8vw,2.8rem)}
+h3{margin:0;font-family:var(--f-mono);font-weight:500;font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+p{margin:0}
+.eyebrow{display:flex;align-items:center;gap:8px;font:500 .76rem/1.2 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.eyebrow::before{content:"";width:9px;height:9px;background:currentColor;transform:rotate(45deg);flex:none}
+.lead{max-width:60ch;color:var(--muted);font-size:1.08rem}
+/* орнаментальна смуга: трикутні виїмки, як облямівка різьбленого тареля; права грань виїмки — у тіні */
+.band{position:relative;height:20px}
+.band::before,.band::after{content:"";position:absolute;inset:0}
+.band::before{background:var(--ochre);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='20'%3E%3Cpath fill-rule='evenodd' d='M1 17L16 2 31 17ZM8 17L16 8.5 24 17Z'/%3E%3Crect y='17.6' width='32' height='1.6'/%3E%3C/svg%3E") repeat-x left center/32px 20px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='20'%3E%3Cpath fill-rule='evenodd' d='M1 17L16 2 31 17ZM8 17L16 8.5 24 17Z'/%3E%3Crect y='17.6' width='32' height='1.6'/%3E%3C/svg%3E") repeat-x left center/32px 20px}
+.band::after{background:color-mix(in srgb,var(--ochre) 55%,#000);opacity:.75;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='20'%3E%3Cpath d='M16 8.5L24 17 16 17Z'/%3E%3C/svg%3E") repeat-x left center/32px 20px;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='20'%3E%3Cpath d='M16 8.5L24 17 16 17Z'/%3E%3C/svg%3E") repeat-x left center/32px 20px}
+/* шапка */
+header{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px 40px;align-items:end}
+header .intro{display:grid;gap:16px}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:how}
+.how li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow);font-size:.92rem;counter-increment:how}
+.how li::before{content:counter(how);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--red);color:var(--on-red);font:700 .9rem/1 var(--f-mono)}
+.how b{font-weight:600}
+header .band,header .topbar{grid-column:1/-1}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.toggles{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.theme,.lang{display:flex;gap:4px;padding:4px;background:var(--panel2);border-radius:999px}
+.theme button,.lang button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font:600 .82rem/1 var(--f-body);color:var(--muted);cursor:pointer}
+.theme button[aria-pressed="true"],.lang button[aria-pressed="true"]{background:linear-gradient(135deg,var(--ochre),var(--red));color:#fff8ee;box-shadow:0 4px 12px -4px color-mix(in srgb,var(--red) 60%,transparent)}
+.sec{display:grid;gap:24px}
+.sec-head{display:grid;gap:10px;max-width:72ch}
+.sec-head p{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:18px;display:grid;gap:14px;min-width:0;box-shadow:var(--shadow)}
+/* студія: сцена + вкладки */
+.studio{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}
+.stage{position:sticky;top:max(14px,env(safe-area-inset-top,0px));border-radius:var(--r-lg);overflow:hidden;touch-action:none;cursor:grab;user-select:none;
+  background:radial-gradient(circle at 50% 44%,var(--stage1),var(--stage2) 72%);box-shadow:0 30px 60px -20px var(--stage-shadow)}
+.stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;
+  background-image:radial-gradient(var(--stage-dot) 1px,transparent 1.4px);background-size:22px 22px;
+  -webkit-mask:radial-gradient(circle at 50% 45%,transparent 30%,#000 75%);mask:radial-gradient(circle at 50% 45%,transparent 30%,#000 75%)}
+.stage:active{cursor:grabbing}
+/* плеєр на весь екран: звізда вписується в менший бік екрана */
+.stage:fullscreen,.stage.full{position:fixed;inset:0;top:0;z-index:60;width:100vw;height:100vh;height:100dvh;border-radius:0;display:grid;place-items:center;box-shadow:none}
+/* полотно на весь екран, щоб сяйво навколо звізди не обрізалося краєм квадрата */
+.stage:fullscreen svg,.stage.full svg{position:absolute;inset:0;width:100%;height:100%}
+.stage:fullscreen .tools,.stage.full .tools{top:max(14px,env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px))}
+.stage:fullscreen .cap,.stage.full .cap{bottom:max(16px,env(safe-area-inset-bottom,0px))}
+body.no-scroll{overflow:hidden}
+.stage svg{position:relative;width:100%;height:auto;display:block}
+.stage .tools{position:absolute;right:14px;top:14px;display:flex;gap:6px}
+.stage .cap{position:absolute;left:18px;bottom:16px;right:18px;display:flex;justify-content:space-between;gap:10px;font:400 .76rem/1.3 var(--f-mono);color:var(--stage-ink);opacity:.85;pointer-events:none}
+.btn{font:500 .78rem/1 var(--f-mono);padding:9px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--stage-ink) 30%,transparent);background:var(--stage-btn);backdrop-filter:blur(6px);color:var(--stage-ink);cursor:pointer}
+.panel{display:grid;gap:16px;min-width:0}
+.tabs{display:flex;gap:4px;padding:5px;background:var(--panel2);border-radius:999px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:transparent;padding:9px 15px;border-radius:999px;font:600 .86rem/1 var(--f-body);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.group{display:grid;gap:12px}
+.label{font:500 .74rem/1.2 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+.label output{color:var(--ink);text-transform:none;letter-spacing:0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.vt{display:grid;gap:5px;justify-items:center;padding:10px 4px 8px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font:600 .78rem/1.15 var(--f-body);text-align:center;transition:transform .15s,border-color .15s}
+.vt:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--red) 40%,var(--line))}
+.vt svg{width:64px;height:64px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.vt[aria-pressed="true"]{background:linear-gradient(135deg,color-mix(in srgb,var(--ochre) 38%,var(--panel)),color-mix(in srgb,var(--red) 22%,var(--panel)));border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--ochre) 35%,transparent),0 6px 16px -6px color-mix(in srgb,var(--red) 55%,transparent);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:flex;align-items:center;gap:8px;font:500 .86rem/1.1 var(--f-body);padding:7px 13px 7px 8px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;transition:border-color .15s}
+.chip:hover{border-color:color-mix(in srgb,var(--ink) 35%,var(--line))}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,color-mix(in srgb,var(--ochre) 38%,var(--panel)),color-mix(in srgb,var(--red) 22%,var(--panel)));border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--ochre) 35%,transparent),0 6px 16px -6px color-mix(in srgb,var(--red) 55%,transparent);color:var(--ink);font-weight:600}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.sw{display:flex;width:24px;height:24px;border-radius:50%;overflow:hidden;flex:none;border:1px solid color-mix(in srgb,var(--ink) 18%,transparent)}
+.sw i{flex:1}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+select,input[type="color"]{font:inherit;font-size:.9rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+input[type="color"]{height:40px;padding:4px}
+.field{display:grid;gap:5px;min-width:0;font-size:.8rem;color:var(--muted)}
+input[type="range"]{width:100%;accent-color:var(--red);margin:0}
+.toggle{display:flex;align-items:center;gap:9px;font-size:.9rem;cursor:pointer;width:fit-content}
+.toggle input{width:18px;height:18px;accent-color:var(--red);margin:0}
+:is(button,select,input):focus-visible{outline:2px solid var(--ochre);outline-offset:2px}
+.desc{font-size:.93rem;max-width:64ch;color:var(--muted)}
+.desc b{font-weight:600;color:var(--ink)}
+.znote{font-size:.84rem;color:var(--red);margin:0}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stats span{font:500 .78rem/1 var(--f-mono);padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);font-variant-numeric:tabular-nums}
+.reset{font:500 .78rem/1 var(--f-mono);padding:8px 12px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--muted);cursor:pointer;justify-self:start}
+/* викрійка */
+.pattern{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
+.sheet-wrap{display:grid;place-items:center;background:var(--panel2);border-radius:var(--r-lg);padding:28px}
+.sheet-wrap svg{max-width:100%;max-height:640px;height:auto;display:block;box-shadow:0 18px 40px -12px rgba(30,15,5,.45);border-radius:2px}
+.dl{display:flex;flex-wrap:wrap;gap:10px}
+.primary{font:600 .95rem/1 var(--f-body);padding:14px 22px;border-radius:999px;border:0;background:var(--red);color:var(--on-red);cursor:pointer;box-shadow:0 8px 20px -8px color-mix(in srgb,var(--red) 70%,transparent)}
+.secondary{font:600 .95rem/1 var(--f-body);padding:14px 22px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.primary:disabled,.secondary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.credits{border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:.86rem;text-align:center}
+.note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--ochre);padding:6px 0 6px 12px;max-width:66ch}
+/* сцени */
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.scene{margin:0;display:grid;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:10px;min-width:0;box-shadow:var(--shadow);transition:transform .2s}
+.scene:hover{transform:translateY(-3px)}
+.scene svg{width:100%;height:auto;display:block;border-radius:calc(var(--r-lg) - 6px)}
+.scene figcaption{display:grid;gap:4px;font-size:.9rem;padding:2px 8px 8px}
+.scene figcaption b{font-family:var(--f-display);font-size:1.25rem;font-weight:700}
+.scene figcaption span{color:var(--muted);font-size:.84rem}
+/* мотиви */
+.motifs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.motifs .card h3{font:700 1.2rem/1.15 var(--f-display);letter-spacing:0;text-transform:none;color:var(--ink)}
+.motifs .card p{font-size:.9rem}
+.motifs .src{font:400 .72rem/1.45 var(--f-mono);color:var(--muted);margin:0}
+.motifs .use{font-size:.84rem;color:var(--ink);border-left:3px solid var(--ochre);padding-left:10px}
+.motifs .pvs{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--panel2);border-radius:10px}
+.motifs .pv{width:48px;height:48px}
+@media (max-width:960px){header,.studio,.pattern{grid-template-columns:1fr}.stage{position:relative;top:0}}
+.mtabs{display:none}
+/* телефон і планшет: звізда закріплена вгорі, під нею вкладки, видно одну групу налаштувань — зміни одразу видно на звізді */
+@media (max-width:960px){
+  .studio{--stage-h:min(86vw,40vh);--tabs-h:50px;gap:12px}
+  .stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;height:var(--stage-h);border-radius:0 0 var(--r-lg) var(--r-lg);box-shadow:0 14px 28px -18px var(--stage-shadow)}
+  .stage svg{position:absolute;inset:0;width:100%;height:100%}
+  .stage .tools{top:10px;right:10px}
+  .stage .btn{padding:7px 11px;font-size:.72rem}
+  .stage .cap{bottom:8px;left:12px;right:12px}
+  .stage .cap span+span{display:none}
+  .mtabs{display:flex;position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--stage-h) + 6px);z-index:5;box-shadow:0 8px 18px -12px var(--stage-shadow)}
+  .panel[data-mob] [data-pane]:not(.on){display:none}
+  .panel{min-height:calc(100vh - var(--stage-h) - var(--tabs-h))}
+}
+@media (max-width:520px){.row{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion: reduce){.vt,.scene{transition:none}.vt:hover,.scene:hover{transform:none}}
+</style>
+
+<svg id="k-defs" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="glow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".38"/><stop offset=".55" stop-color="#ffb84d" stop-opacity=".12"/><stop offset="1" stop-color="#ffb84d" stop-opacity="0"/></radialGradient>
+    <radialGradient id="deco-ball" cx=".38" cy=".34" r=".7"><stop offset="0" style="stop-color:#fff;stop-opacity:.85"/><stop offset=".25" style="stop-color:var(--deco)"/><stop offset="1" style="stop-color:color-mix(in srgb, var(--deco) 55%, #000)"/></radialGradient>
+    <linearGradient id="deco-gold" x1="0" x2="1"><stop offset="0" style="stop-color:color-mix(in srgb, var(--deco) 70%, #000)"/><stop offset=".45" style="stop-color:color-mix(in srgb, var(--deco) 60%, #fff)"/><stop offset="1" style="stop-color:color-mix(in srgb, var(--deco) 65%, #000)"/></linearGradient>
+    <radialGradient id="deco-glow"><stop offset="0" style="stop-color:#fff8dc"/><stop offset=".25" style="stop-color:var(--deco);stop-opacity:.9"/><stop offset="1" style="stop-color:var(--deco);stop-opacity:0"/></radialGradient>
+    <filter id="lift1" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity=".45"/></filter>
+    <filter id="lift2" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#000" flood-opacity=".6"/></filter>
+    <filter id="lift2b" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="34" stdDeviation="26" flood-color="#000" flood-opacity=".85"/></filter>
+    <clipPath id="k-clip"><path id="k-clip-path" clip-rule="evenodd" d=""/></clipPath>
+    <g id="k-star">
+      <path id="k-face" fill-rule="evenodd" style="fill:var(--face)" d=""/>
+      <path id="k-rim" clip-path="url(#k-clip)" style="fill:none;stroke:var(--rim)" d=""/>
+      <path id="k-edge" fill-rule="evenodd" style="fill:none;stroke:var(--edge);stroke-width:5" d=""/>
+    </g>
+    <clipPath id="k2-clip"><path id="k2-clip-path" clip-rule="evenodd" d=""/></clipPath>
+    <g id="k-star2">
+      <path id="k2-halo" style="fill:none;stroke:#efe2c8;stroke-linejoin:round" d=""/>
+      <path id="k2-face" fill-rule="evenodd" style="fill:var(--face2)" d=""/>
+      <path id="k2-rim" clip-path="url(#k2-clip)" style="fill:none;stroke:var(--rim2)" d=""/>
+      <path id="k2-edge" fill-rule="evenodd" style="fill:none;stroke:var(--edge2);stroke-width:5" d=""/>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="topbar">
+      <div class="eyebrow">Конструктор зірок</div>
+      <div class="toggles">
+        <div class="theme" role="group" aria-label="Тема сторінки">
+          <button type="button" data-t="light" aria-pressed="false">Світла</button>
+          <button type="button" data-t="dark" aria-pressed="false">Темна</button>
+        </div>
+        <div class="lang" role="group" aria-label="Мова сторінки">
+          <button type="button" data-l="uk" lang="uk" aria-pressed="true">Укр</button>
+          <button type="button" data-l="en" lang="en" aria-pressed="false">Eng</button>
+        </div>
+      </div>
+    </div>
+    <div class="intro">
+    <h1>Конструктор <em>звізд</em></h1>
+    <p class="lead">Різдвяні звізди за мотивами полтавської різьби по дереву, майоліки й вікон будинку губернського земства, дерев'яних церков, вишивки й писанок. Основу можна змінити: кількість і форму променів, орнамент прорізів і кольори. Готову звізду можна роздрукувати викрійкою на аркуші A4, A3 або A2.</p>
+    </div>
+    <ol class="how">
+      <li><span><b>Оберіть основу</b> з 18 звізд за мотивами полтавської різьби, майоліки й вишивки.</span></li>
+      <li><span><b>Налаштуйте</b> промені, орнамент, кольори, другий шар і прикраси.</span></li>
+      <li><span><b>Роздрукуйте викрійку</b> на A4, A3 або A2 цілою, половинами чи чвертями.</span></li>
+    </ol>
+    <div class="band" aria-hidden="true"></div>
+  </header>
+
+  <section class="studio" aria-label="Конструктор">
+    <div class="stage" id="stage">
+      <svg viewBox="-1330 -1330 2660 2660" id="stage-svg" role="img" aria-label="Звізда, що обертається">
+        <circle r="1450" fill="url(#glow)"/>
+        <g id="spin"><use href="#k-star" filter="url(#lift1)"/><g class="deco-fix"></g></g>
+        <g class="spin2" hidden><use href="#k-star2" filter="url(#lift2)"/></g>
+        <g class="deco-hang"></g>
+      </svg>
+      <div class="tools"><button class="btn" id="b-auto" type="button">Пауза</button><button class="btn" id="b-full" type="button" aria-pressed="false">На весь екран</button></div>
+      <div class="cap"><span id="cap-name"></span><span>перетягування обертає звізду</span></div>
+    </div>
+
+    <div class="panel" data-mob>
+      <div class="tabs mtabs" role="tablist" aria-label="Налаштування звізди">
+        <button class="tab" role="tab" type="button" data-k="base">Основа</button>
+        <button class="tab" role="tab" type="button" data-k="shape">Промені</button>
+        <button class="tab" role="tab" type="button" data-k="ornament">Орнамент</button>
+        <button class="tab" role="tab" type="button" data-k="colors">Кольори</button>
+        <button class="tab" role="tab" type="button" data-k="layer">Другий шар</button>
+        <button class="tab" role="tab" type="button" data-k="deco">Прикраси</button>
+      </div>
+      <div class="group" data-pane="base">
+        <div class="label">Основа · <output id="v-count"></output></div>
+        <div class="gallery" id="gallery"></div>
+        <p class="desc" id="desc"></p>
+      </div>
+
+      <div class="group card" data-pane="shape">
+        <h3>Промені</h3>
+        <div class="row">
+          <label class="field" for="n">Кількість<select id="n"></select></label>
+          <label class="field" for="prof">Форма<select id="prof"></select></label>
+          <label class="field" for="alt">Через один<select id="alt"><option value="0">однакові</option><option value="0.85">трохи коротші</option><option value="0.78">коротші</option><option value="0.7">значно коротші</option></select></label>
+        </div>
+        <div class="label"><label for="rin">Серцевина</label><output id="rin-out"></output></div>
+        <input type="range" id="rin" min="38" max="66" step="1" value="50">
+      </div>
+
+      <div class="group card" data-pane="ornament">
+        <h3>Орнамент прорізів</h3>
+        <div class="row">
+          <label class="field" for="z-center">Серцевина<select id="z-center"></select></label>
+          <label class="field" for="z-base">Основа променя<select id="z-base"></select></label>
+          <label class="field" for="z-tip">Кінчик променя<select id="z-tip"></select></label>
+        </div>
+        <div class="label"><label for="ajur">Ажурність</label><output id="ajur-out"></output></div>
+        <input type="range" id="ajur" min="40" max="100" step="5" value="100">
+        <p class="znote" id="z-note" hidden></p>
+      </div>
+
+      <div class="group card" data-pane="colors">
+        <h3>Кольори</h3>
+        <div class="chips" id="pals"></div>
+        <div class="row">
+          <label class="field" for="c-face">Основа<input type="color" id="c-face"></label>
+          <label class="field" for="c-rim">Обвідка прорізів<input type="color" id="c-rim"></label>
+          <label class="field" for="c-edge">Контур<input type="color" id="c-edge"></label>
+        </div>
+        <div class="label"><label for="rimw">Ширина обвідки</label><output id="rimw-out"></output></div>
+        <input type="range" id="rimw" min="0" max="44" step="2" value="24">
+      </div>
+
+      <div class="group card" data-pane="layer">
+        <h3>Другий шар</h3>
+        <label class="toggle" for="l-on"><input type="checkbox" id="l-on"> Накласти другу звізду зверху</label>
+        <div class="group" id="l-opts">
+          <div class="row">
+            <label class="field" for="l-vid">Основа<select id="l-vid"></select></label>
+            <label class="field" for="l-mode">Обертання<select id="l-mode"><option value="counter">назустріч</option><option value="same">разом</option><option value="still">нерухомо</option></select></label>
+            <label class="field" for="l-size">Розмір · <output id="l-size-out"></output><input type="range" id="l-size" min="30" max="85" step="5" value="55"></label>
+          </div>
+          <div class="label">Промені другої звізди</div>
+          <div class="row">
+            <label class="field" for="l-n">Кількість<select id="l-n"></select></label>
+            <label class="field" for="l-prof">Форма<select id="l-prof"></select></label>
+            <label class="field" for="l-alt">Через один<select id="l-alt"></select></label>
+          </div>
+          <div class="label"><label for="l-rin">Серцевина</label><output id="l-rin-out"></output></div>
+          <input type="range" id="l-rin" min="38" max="66" step="1" value="50">
+          <div class="label">Орнамент другої звізди</div>
+          <div class="row">
+            <label class="field" for="l-zc">Серцевина<select id="l-zc"></select></label>
+            <label class="field" for="l-zb">Основа променя<select id="l-zb"></select></label>
+            <label class="field" for="l-zt">Кінчик променя<select id="l-zt"></select></label>
+          </div>
+          <div class="label"><label for="l-ajur">Ажурність</label><output id="l-ajur-out"></output></div>
+          <input type="range" id="l-ajur" min="40" max="100" step="5" value="100">
+          <div class="label">Кольори другої звізди</div>
+          <div class="chips" id="l-pals"></div>
+          <div class="row">
+            <label class="field" for="l-face">Основа<input type="color" id="l-face"></label>
+            <label class="field" for="l-rim">Обвідка прорізів<input type="color" id="l-rim"></label>
+            <label class="field" for="l-edge">Контур<input type="color" id="l-edge"></label>
+          </div>
+          <div class="row">
+            <label class="field" for="l-halo">Окантовка між шарами<select id="l-halo"><option value="0">без окантовки</option><option value="22">тонка</option><option value="44">середня</option><option value="70">широка</option></select></label>
+            <label class="field" for="l-shadow">Тінь<select id="l-shadow"><option value="0">без тіні</option><option value="1">м'яка</option><option value="2">глибока</option></select></label>
+          </div>
+          <button class="reset" id="l-reset" type="button">Повернути форму основи другої звізди</button>
+        </div>
+      </div>
+
+      <div class="group card" data-pane="deco">
+        <h3>Прикраси на кінчиках</h3>
+        <div class="chips" id="decos"></div>
+        <div class="row" id="deco-opts">
+          <label class="field" for="d-color">Колір<input type="color" id="d-color"></label>
+          <label class="field" for="d-every">На променях<select id="d-every"><option value="all">на всіх</option><option value="alt">через один</option></select></label>
+          <label class="field" for="d-size">Розмір<input type="range" id="d-size" min="60" max="160" step="10" value="100"></label>
+        </div>
+        <label class="toggle" for="d-hole" id="d-hole-wrap"><input type="checkbox" id="d-hole"> Отвір для шнурка біля кінчика (є й у викрійці)</label>
+      </div>
+
+      <div class="stats" id="stats"></div>
+      <button class="reset" id="reset" type="button">Повернути основу як була</button>
+    </div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+  <section class="sec" id="vykrijka">
+    <div class="sec-head">
+      <div class="eyebrow">Викрійка</div>
+      <h2>Друк на аркуші</h2>
+      <p>Звізда масштабується так, щоб вибрана частина вмістилася на аркуш з полем 10 мм. Половина й чверть дають більшу звізду: частини вирізають кілька разів і склеюють по клапану.</p>
+    </div>
+    <div class="pattern">
+      <div class="sheet-wrap" id="sheet-wrap"></div>
+      <div class="panel">
+        <div class="group" id="player-g">
+          <div class="label">Шар</div>
+          <div class="chips" id="player"></div>
+        </div>
+        <div class="group">
+          <div class="label">Формат аркуша</div>
+          <div class="chips" id="fmt"></div>
+        </div>
+        <div class="group">
+          <div class="label">Що розмістити</div>
+          <div class="chips" id="part"></div>
+          <label class="toggle" for="tab"><input type="checkbox" id="tab" checked> Клапан для склеювання</label>
+          <label class="toggle" for="fill"><input type="checkbox" id="fill"> Залити кольором (для кольорового друку)</label>
+        </div>
+        <div class="stats" id="pstats"></div>
+        <div class="dl">
+          <button class="primary" id="dl-pdf" type="button">Завантажити PDF</button>
+          <button class="secondary" id="dl-svg" type="button">Завантажити SVG</button>
+        </div>
+        <p class="note" id="dl-note"></p>
+        <p class="note">Друк у масштабі 100 %, без «підігнати під сторінку». Контрольний відрізок 50 мм на аркуші допомагає перевірити масштаб.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <div class="eyebrow">Де може бути звізда</div>
+      <h2>Звізда в різних місцях</h2>
+      <p>Та сама звізда з конструктора, з вашими кольорами, другим шаром і прикрасами, у різних сценах. Під кожною сценою вказано орієнтовний розмір і як її роздрукувати.</p>
+    </div>
+    <div class="scenes">%%SCENES%%</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <div class="eyebrow">Мотиви</div>
+      <h2>Звідки взялися форми й кольори</h2>
+      <p>Кожна форма й мотив конструктора має джерело: полтавська різьба по дереву, будинок губернського земства, дерев'яні храми з книги Щербаківського, вишивка, плахти й писанки. Звізди — стилізації «за мотивами», а не копії конкретних предметів.</p>
+    </div>
+    <div class="motifs" id="motifs"></div>
+  </section>
+
+  <footer class="credits">Розробка — Вартан Маркар'ян. © 2026</footer>
+</div>
+
+<script>
+/* ================= геометрія ================= */
+const TAU = 2 * Math.PI, R = 1200;
+const rot = ([x, y], a) => { const c = Math.cos(a), s = Math.sin(a); return [x * c - y * s, x * s + y * c]; };
+const P = pts => ({t: 'p', pts}), Cc = (c, r) => ({t: 'c', c, r});
+function smp(sh){
+  if (sh.t === 'c'){ const o = []; for (let i = 0; i < 40; i++){ const a = i * TAU / 40; o.push([sh.c[0] + sh.r * Math.cos(a), sh.c[1] + sh.r * Math.sin(a)]); } return o; }
+  return sh.pts;
+}
+const shRot = (sh, a) => sh.t === 'c' ? Cc(rot(sh.c, a), sh.r) : P(sh.pts.map(p => rot(p, a)));
+const shMap = (sh, f, k = 1) => sh.t === 'c' ? Cc(f(sh.c), sh.r * k) : P(sh.pts.map(f));
+function area(pts){ let s = 0; for (let i = 0; i < pts.length; i++){ const [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % pts.length]; s += x1 * y2 - x2 * y1; } return Math.abs(s) / 2; }
+function perim(pts){ let s = 0; for (let i = 0; i < pts.length; i++){ const a = pts[i], b = pts[(i + 1) % pts.length]; s += Math.hypot(b[0] - a[0], b[1] - a[1]); } return s; }
+const shArea = sh => sh.t === 'c' ? Math.PI * sh.r * sh.r : area(sh.pts);
+const shPerim = sh => sh.t === 'c' ? TAU * sh.r : perim(sh.pts);
+const shCenter = sh => { if (sh.t === 'c') return sh.c; let x = 0, y = 0; sh.pts.forEach(p => { x += p[0]; y += p[1]; }); return [x / sh.pts.length, y / sh.pts.length]; };
+const f1 = v => (Math.round(v * 10) / 10).toString();
+function shD(sh){
+  if (sh.t === 'c'){ const [cx, cy] = sh.c, r = sh.r; return `M${f1(cx + r)} ${f1(cy)}A${f1(r)} ${f1(r)} 0 1 0 ${f1(cx - r)} ${f1(cy)}A${f1(r)} ${f1(r)} 0 1 0 ${f1(cx + r)} ${f1(cy)}Z`; }
+  return 'M' + sh.pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') + 'Z';
+}
+
+/* ---------- мотиви (локальні координати променя: вісь X від центру до вершини) ---------- */
+function lens(x0, x1, b, n = 14){
+  const a = (x1 - x0) / 2, xc = x0 + a, R0 = (a * a + b * b) / (2 * b), up = [];
+  for (let i = 0; i <= n; i++){ const x = -a + 2 * a * i / n; up.push([xc + x, Math.max(Math.sqrt(Math.max(R0 * R0 - x * x, 0)) - (R0 - b), 0)]); }
+  return P(up.concat(up.slice(1, -1).reverse().map(([x, y]) => [x, -y])));
+}
+function drop(x0, x1, b, out, n = 20){
+  const c = x0 + b, d = x1 - c; if (d <= b * 1.05) return null;
+  const phi = Math.acos(b / d), pts = [[x1, 0]];
+  for (let i = 0; i <= n; i++){ const a = phi + (TAU - 2 * phi) * i / n; pts.push([c + b * Math.cos(a), b * Math.sin(a)]); }
+  return P(out ? pts : pts.map(([x, y]) => [x0 + x1 - x, y]));
+}
+const mirror = up => up.concat(up.slice().reverse().map(([x, y]) => [x, -y]));
+const TULIP = [[0, -0.20], [0.16, -0.20], [0.22, -0.50], [0.32, -0.82], [0.46, -1.0], [0.60, -0.96], [0.50, -0.74], [0.44, -0.46], [0.60, -0.44], [0.80, -0.34], [0.94, -0.17], [1.0, 0]];
+function lobes(x0, x1, b, k){
+  const r = Math.min(b, (x1 - x0) / 2), xc = (x0 + x1) / 2, pts = [];
+  for (let i = 0; i < 90; i++){ const a = i * TAU / 90, rr = r * (0.68 + 0.32 * Math.cos(k * a)); pts.push([xc + rr * Math.cos(a), rr * Math.sin(a)]); }
+  return P(pts);
+}
+function whirl(x0, x1, b, d0, d1, n = 28){
+  const P0 = [x0, -d0], P1 = [(x0 + x1) / 2 + 0.1 * (x1 - x0), -1.2 * d0], P2 = [x1, d1], L = [], Rr = [];
+  for (let i = 0; i <= n; i++){
+    const t = i / n, cx = (1 - t) ** 2 * P0[0] + 2 * (1 - t) * t * P1[0] + t * t * P2[0], cy = (1 - t) ** 2 * P0[1] + 2 * (1 - t) * t * P1[1] + t * t * P2[1];
+    const dx = 2 * (1 - t) * (P1[0] - P0[0]) + 2 * t * (P2[0] - P1[0]), dy = 2 * (1 - t) * (P1[1] - P0[1]) + 2 * t * (P2[1] - P1[1]);
+    const l = Math.hypot(dx, dy) || 1, w = b * Math.pow(Math.sin(Math.PI * t), 0.85);
+    L.push([cx - dy / l * w, cy + dx / l * w]); Rr.push([cx + dy / l * w, cy - dx / l * w]);
+  }
+  return P(L.concat(Rr.reverse().slice(1, -1)));
+}
+const MOTIF = {
+  dot:     {n: 'Горошина', cap: .5, g: (x0, x1, b) => Cc([(x0 + x1) / 2, 0], Math.min(b, (x1 - x0) / 2))},
+  lens:    {n: 'Мигдалик', cap: .38, g: (x0, x1, b) => lens(x0, x1, b)},
+  drop:    {n: 'Крапля назовні', cap: .4, g: (x0, x1, b) => drop(x0, x1, b, true)},
+  dropin:  {n: 'Крапля до центру', cap: .4, g: (x0, x1, b) => drop(x0, x1, b, false)},
+  rhombus: {n: 'Ромб', cap: .55, g: (x0, x1, b) => P([[x0, 0], [(x0 + x1) / 2, -b], [x1, 0], [(x0 + x1) / 2, b]])},
+  steprh:  {n: 'Ступінчастий ромб', cap: .5, g: (x0, x1, b) => {
+    const k = 3, xc = (x0 + x1) / 2, dx = (x1 - x0) / 2 / k, dy = b / k, up = [];
+    for (let i = 0; i < k; i++) up.push([x0 + i * dx, (i + 1) * dy], [x0 + (i + 1) * dx, (i + 1) * dy]);
+    const upper = up.concat(up.slice(0, -1).reverse().map(([x, y]) => [2 * xc - x, y]));
+    return P(upper.concat(upper.slice().reverse().map(([x, y]) => [x, -y]))); }},
+  trap:    {n: 'Трапеція', cap: .6, g: (x0, x1, b) => P([[x0, -b], [x1, -0.55 * b], [x1, 0.55 * b], [x0, b]])},
+  hexa:    {n: 'Шестикутник', cap: .45, g: (x0, x1, b) => { const a = x1 - x0; return P([[x0, 0], [x0 + .28 * a, -b], [x1 - .28 * a, -b], [x1, 0], [x1 - .28 * a, b], [x0 + .28 * a, b]]); }},
+  window:  {n: 'Вікно модерну', cap: .65, g: (x0, x1, b) => { const L = x1 - x0, up = [[x0, b], [x1 - .24 * L, .74 * b], [x1, .44 * b]]; return P(up.concat(up.slice().reverse().map(([x, y]) => [x, -y]))); }},
+  tri:     {n: 'Трикутник назовні', cap: .5, g: (x0, x1, b) => P([[x0, -b], [x1, 0], [x0, b]])},
+  triin:   {n: 'Трикутник до центру', cap: .5, g: (x0, x1, b) => P([[x1, -b], [x1, b], [x0, 0]])},
+  tulip:   {n: 'Крин', cap: .55, g: (x0, x1, b) => { const L = x1 - x0, lo = TULIP.map(([u, v]) => [x0 + u * L, v * b]); return P(lo.concat(lo.slice(0, -1).reverse().map(([x, y]) => [x, -y]))); }},
+  sprig:   {n: 'Гілочка', cap: .45, g: (x0, x1, b) => {
+    const L = x1 - x0, w = b * .17, lo = [[x0, -w], [x0 + .2 * L, -w], [x0 + .38 * L, -b], [x0 + .42 * L, -w], [x0 + .55 * L, -w], [x0 + .7 * L, -.72 * b], [x0 + .74 * L, -w], [x0 + .84 * L, -w], [x1, 0]];
+    return P(lo.concat(lo.slice(0, -1).reverse().map(([x, y]) => [x, -y]))); }},
+  lobes3:  {n: 'Трилисник', cap: .5, g: (x0, x1, b) => lobes(x0, x1, b, 3)},
+  lobes4:  {n: 'Чотирилисник', cap: .5, g: (x0, x1, b) => lobes(x0, x1, b, 4)},
+  rosette: {n: 'Розетка', cap: .5, g: (x0, x1, b) => {
+    // шість пелюсток-мигдаликів сходяться вершинами в центрі, як різьблена розетка; між вершинами — тонка перемичка
+    const xc = (x0 + x1) / 2, rr = Math.min(b, (x1 - x0) / 2), out = [];
+    for (let i = 0; i < 6; i++){ const a = i * Math.PI / 3 + Math.PI / 6; out.push(shMap(lens(rr * .06, rr, rr * .13, 12), p => { const q = rot(p, a); return [q[0] + xc, q[1]]; })); }
+    return out; }},
+  whirl:   {n: 'Вихор (серп)', cap: .25, ctx: true, g: (x0, x1, b, c) => whirl(x0, x1, b, c.d0, c.d1)},
+  arcring: {n: 'Дуга сяйва', cap: .5, ctx: true, g: (x0, x1, b, c) => {
+    const rc = (x0 + x1) / 2, bb = Math.min(b, (x1 - x0) / 2), s = (c.seam + bb) / rc; if (s >= 1) return null;
+    const phi = c.half - Math.asin(s) - 0.02; if (phi < 0.03) return null;
+    const o = [], n = 18;
+    for (let i = 0; i <= n; i++){ const a = -phi + 2 * phi * i / n; o.push([(rc + bb) * Math.cos(a), (rc + bb) * Math.sin(a)]); }
+    for (let i = n; i >= 0; i--){ const a = -phi + 2 * phi * i / n; o.push([(rc - bb) * Math.cos(a), (rc - bb) * Math.sin(a)]); }
+    return P(o); }},
+  chain_tri: {n: 'Ланцюжок трикутників', chain: ['tri', 'triin', 'tri']},
+  chain_dot: {n: 'Ланцюжок горошин', chain: ['dot', 'dot', 'dot']},
+  chain_rh:  {n: 'Ланцюжок ромбів', chain: ['rhombus', 'rhombus', 'rhombus']},
+};
+const ZONE_NAMES = {center: 'серцевина', base: 'основа променя', tip: 'кінчик променя'};
+const MOTIF_ORDER = ['none', 'dot', 'lens', 'drop', 'dropin', 'rhombus', 'steprh', 'trap', 'hexa', 'window', 'tri', 'triin', 'tulip', 'sprig', 'lobes3', 'lobes4', 'rosette', 'whirl', 'arcring', 'chain_tri', 'chain_dot', 'chain_rh'];
+
+function stair(levels){
+  // уступчастий промінь: рівні висоти (частки від западини) на рівних кроках уздовж променя
+  const n = levels.length - 1, pts = [];
+  for (let i = 1; i <= n; i++){ const t = i / (n + 1); pts.push([t, levels[i - 1] / (1 - t)], [t, levels[i] / (1 - t)]); }
+  return pts;
+}
+function church(){
+  // силует ярусної дерев'яної церкви вздовж променя: зруби з піддашшями, прямий намет, шийка, маківка й хрест.
+  // t — частка довжини променя від западини, y — частка півширини біля западини
+  let pts = [[0, 1], [0.16, 0.95],                                  // нижній зруб
+             [0.165, 1.10], [0.18, 1.10], [0.25, 0.86],             // піддашшя: торець і схил
+             [0.37, 0.83], [0.375, 1.00], [0.39, 1.00], [0.45, 0.72],   // другий ярус
+             [0.54, 0.69], [0.545, 0.86], [0.56, 0.86],             // третій ярус і карниз намету
+             [0.79, 0.11], [0.81, 0.10],                            // прямий намет і шийка
+             [0.83, 0.19], [0.86, 0.22], [0.89, 0.17], [0.905, 0.07],   // маківка
+             [0.915, 0.04], [1, 0]];                                // хрест
+  const q = 0.12, o = [pts[0]];   // ледь пом'якшені кути, кінці на місці
+  for (let i = 0; i < pts.length - 1; i++){ const a = pts[i], b = pts[i + 1]; o.push([a[0] * (1 - q) + b[0] * q, a[1] * (1 - q) + b[1] * q], [a[0] * q + b[0] * (1 - q), a[1] * q + b[1] * (1 - q)]); }
+  o.push(pts[pts.length - 1]);
+  return o.slice(1, -1).map(([t, y]) => [t, y / (1 - t)]);
+}
+const PROFILES = {
+  sharp:   {n: 'Гострий', p: []},
+  concave: {n: 'Увігнутий', p: [[0.5, 0.8]]},
+  spike:   {n: 'Тонкий', p: [[0.3, 0.55]]},
+  convex:  {n: 'Опуклий', p: [[0.4, 1.14]]},
+  tower:   {n: 'Вежа', p: [[0.42, 1.42], [0.62, 0.95]]},
+  dome:    {n: 'Маківка', p: [[0.2, 1.3], [0.42, 1.35], [0.6, 0.75]]},
+  tiers:   {n: 'Ярусний храм', p: church(), strict: true},
+  steps:   {n: 'Ступінчастий', p: stair([1, 0.8, 0.55, 0.3]), strict: true},
+  lancet:  {n: 'Сливки', p: [], lens: 0.17, strict: true},
+};
+
+/* ---------- зірка ---------- */
+function buildStar(spec){
+  const N = spec.N, half = Math.PI / N, rin = spec.rin * R, alt = spec.alt ? spec.alt * R : 0;
+  const prof = PROFILES[spec.prof] || PROFILES.sharp, margin = 24, seam = 14, rclear = 0.2 * R, gap = 26, ajur = spec.ajur ?? 1;
+  const tip = k => (alt && k % 2 === 1) ? Math.max(alt, rin * 1.25) : R;
+  const xv = rin * Math.cos(half), yv = rin * Math.sin(half);
+  function lensProfile(Rk){
+    // мигдалева пелюстка різьбленої розетки: дві дуги кола сходяться в гострий кінчик без заокруглення;
+    // внутрішній кінчик схований у серцевині, тож пелюстка тримається на ній широкою основою
+    const x0 = 0.55 * rin, L = Rk - x0, xm = x0 + L / 2;
+    const h = Math.min(prof.lens * L, 0.8 * xm * Math.tan(half)), r = (L * L / 4 + h * h) / (2 * h);
+    const y = x => Math.sqrt(Math.max(r * r - (x - xm) ** 2, 0)) - (r - h);
+    const lim = x => x * Math.tan(half) - 14 * Math.min(1, (x - xv) / 40);   // зазор до сусідньої пелюстки
+    let phi = half; const pts = [[xv, yv]];
+    // від западини по краю серцевини до місця, де з неї виходить пелюстка
+    while (phi > 0.02 && rin * Math.sin(phi) > y(rin * Math.cos(phi))){ phi -= half / 24; if (rin * Math.sin(phi) > y(rin * Math.cos(phi))) pts.push([rin * Math.cos(phi), rin * Math.sin(phi)]); }
+    const xs = pts[pts.length - 1][0];
+    for (let i = 1; i < 40; i++){ const x = xs + (Rk - xs) * i / 40; pts.push([x, Math.max(Math.min(y(x), lim(x)), 0)]); }
+    pts.push([Rk, 0]); return pts;
+  }
+  function halfProfile(Rk){
+    if (prof.lens) return lensProfile(Rk);
+    const pts = [[xv, yv]];
+    prof.p.forEach(([t, s]) => { const x = xv + t * (Rk - xv); let y = yv * (1 - t) * s;
+      pts.push([x, y]); });
+    pts.push([Rk, 0]); return pts;
+  }
+  function hf0(x, Rk, hp){
+    if (x < xv) return x * Math.tan(half) - seam / Math.cos(half);
+    for (let i = 0; i < hp.length - 1; i++){
+      const [xa, ya] = hp[i], [xb, yb] = hp[i + 1];
+      if (xa <= x && x <= xb && xb > xa){ const y = ya + (yb - ya) * (x - xa) / (xb - xa), sl = Math.abs(yb - ya) / (xb - xa); return y - margin * (prof.strict ? Math.min(Math.sqrt(1 + sl * sl), 1.5) : Math.sqrt(1 + sl * sl)); }
+    }
+    return -1;
+  }
+  function hf(x, Rk, hp){ return prof.strict ? Math.min(...[-margin, -margin / 2, 0, margin / 2, margin].map(d => hf0(x + d, Rk, hp))) : hf0(x, Rk, hp); }
+  function fits(shapes, Rk, hp){
+    for (const sh of shapes) for (const [x, y] of smp(sh)) if (x < rclear || Math.abs(y) > hf(x, Rk, hp)) return false;
+    return true;
+  }
+  function fitOne(kind, x0, x1, Rk, hp){
+    // обрізаємо зону там, де промінь вужчий за перемичку: видовжені мотиви доходять кінцями до меж зони
+    const ok = x => hf(x, Rk, hp) > 6, step = (x1 - x0) / 40;
+    while (x1 - x0 > 30 && !ok(x1)) x1 -= step;
+    while (x1 - x0 > 30 && !ok(x0)) x0 += step;
+    const m = MOTIF[kind]; if (!m || x1 - x0 < 30) return [];
+    const c = {half, seam, d0: 0.4 * Math.max(hf(x0, Rk, hp), 0), d1: 0.8 * Math.max(hf(x1, Rk, hp), 0)};
+    const gen = b => { const r = m.g(x0, x1, b, c); return r == null ? null : (Array.isArray(r) ? r : [r]); };
+    let lo = 0, hi = m.cap * (x1 - x0), best = 0;
+    for (let i = 0; i < 22; i++){ const mid = (lo + hi) / 2, s = gen(mid); if (s && fits(s, Rk, hp)){ best = mid; lo = mid; } else hi = mid; }
+    const b = best * ajur;
+    if (b < 8) return [];
+    return gen(b) || [];
+  }
+  function zone(kind, x0, x1, Rk, hp){
+    if (!kind || kind === 'none') return [];
+    const m = MOTIF[kind];
+    if (m && m.chain){
+      const w = [0.42, 0.33, 0.25], L = x1 - x0 - 2 * gap; let x = x0, out = [];
+      m.chain.forEach((k, i) => { const len = L * w[i]; out = out.concat(fitOne(k, x, x + len, Rk, hp)); x += len + gap; });
+      return out;
+    }
+    return fitOne(kind, x0, x1, Rk, hp);
+  }
+  const cache = {};
+  const zoneRange = (name, Rk) => { const L = Rk - xv;
+    return name === 'center' ? [rclear + 4, xv - gap * .6] : name === 'base' ? [xv + gap, xv + 0.42 * L] : [xv + 0.42 * L + gap, Rk - 0.1 * L]; };
+  function rayHoles(Rk){
+    if (cache[Rk]) return cache[Rk];
+    const hp = halfProfile(Rk), z = spec.z;
+    const h = [].concat(...['center', 'base', 'tip'].map(n => zone(z[n], ...zoneRange(n, Rk), Rk, hp)));
+    return cache[Rk] = h;
+  }
+  // чи вміщується мотив у зону довгого променя (для підказок у списках)
+  const fitsZone = (name, kind) => kind === 'none' || zone(kind, ...zoneRange(name, R), R, halfProfile(R)).length > 0;
+  const ang = k => -Math.PI / 2 + k * TAU / N;
+  const hangCache = {};
+  function hangHole(Rk){   // отвір для шнурка якомога ближче до кінчика, подалі від інших прорізів
+    if (Rk in hangCache) return hangCache[Rk];
+    const hp = halfProfile(Rk), L = Rk - xv, rh = 11, other = rayHoles(Rk).flatMap(smp);
+    for (let x = Rk - 0.04 * L; x > xv + 0.3 * L; x -= 4){
+      const c = Cc([x, 0], rh);
+      if (fits([c], Rk, hp) && other.every(([px, py]) => Math.hypot(px - x, py) > rh + 18)) return hangCache[Rk] = c;
+    }
+    return hangCache[Rk] = null;
+  }
+  const decoOn = spec.deco && spec.deco !== 'none', anchors = [];
+  const outline = [rot([rin, 0], ang(0) - half)], valley = [0], holes = [];
+  for (let k = 0; k < N; k++){
+    const Rk = tip(k), hp = halfProfile(Rk), mid = hp.slice(1, -1);
+    const local = mid.map(([x, y]) => [x, -y]).concat([[Rk, 0]], mid.slice().reverse());
+    local.forEach(p => outline.push(rot(p, ang(k))));
+    if (k < N - 1){ outline.push(rot([rin, 0], ang(k) + half)); valley.push(outline.length - 1); }
+    rayHoles(Rk).forEach(sh => holes.push(shRot(sh, ang(k))));
+    if (decoOn && (spec.devery !== 'alt' || k % 2 === 0)){
+      let ax = Rk;
+      const hh = spec.dhole ? hangHole(Rk) : null;
+      if (hh){ holes.push(shRot(hh, ang(k))); ax = hh.c[0]; }
+      anchors.push(rot([ax, 0], ang(k)));
+    }
+  }
+  const A = area(outline), H = holes.reduce((s, h) => s + shArea(h), 0);
+  return {N, outline, valley, holes, anchors, alt: !!alt, openPct: 100 * H / A, fitsZone,
+          cut: perim(outline) + holes.reduce((s, h) => s + shPerim(h), 0)};
+}
+const starD = s => shD(P(s.outline)) + s.holes.map(shD).join('');
+const holesD = s => s.holes.map(shD).join('');
+
+/* ================= дані ================= */
+const PALS = {
+  // той самий принцип, що й на сайті: основа + контрастна обвідка; друга звізда бере обвідку першої як основу,
+  // а її обвідка — третій, акцентний колір (rim2), щоб шари не зливалися
+  indigo:   {n: 'Індиго й охра',   face: '#1f3d8f', rim: '#f2b632', rim2: '#c3262e', src: 'палітра сайту'},
+  ochre:    {n: 'Охра й синь',     face: '#e0a21b', rim: '#1c2f5e', rim2: '#f2c230', src: 'палітра сайту'},
+  green:    {n: 'Зелень і золото', face: '#2f6b3a', rim: '#f2b632', rim2: '#e8742a', src: 'палітра сайту'},
+  orange:   {n: 'Помаранчева',     face: '#e8742a', rim: '#6b3a1e', rim2: '#f6c945', src: 'палітра сайту'},
+  black:    {n: 'Вишня й золото',  face: '#6b1a24', rim: '#e8b23a', rim2: '#e8742a', src: 'палітра сайту'},
+  sun:      {n: 'Святкова жовта',  face: '#f2b632', rim: '#b3202a', rim2: '#fff4dc', src: 'палітра сайту'},
+  white:    {n: 'Біла з червоним', face: '#f3eee4', rim: '#b3202a', rim2: '#f2c230', src: 'палітра сайту'},
+  lypa:     {n: 'Липа й вишня',    face: '#dcc59b', rim: '#7a1418', rim2: '#f2c230', src: 'різьба з липи на вишневому тлі'},
+  majolica: {n: 'Майоліка',        face: '#2a4c8c', rim: '#e9dfc6', rim2: '#2e8c8a', src: 'кахлі й панно будинку земства'},
+  tiles:    {n: 'Зелені кахлі',    face: '#9dbb4a', rim: '#23367a', rim2: '#f2c230', src: 'кахлі зі «стрілками» у вестибюлі'},
+  brick:    {n: 'Цегла й черепиця',face: '#b4513a', rim: '#e2d3b0', rim2: '#3f5b3b', src: 'фасад і дахи будинку земства'},
+  vyshyvka: {n: 'Вишивка',         face: '#efe7d8', rim: '#b0272d', rim2: '#5a1424', src: 'полтавські рушники'},
+  pysanka:  {n: 'Писанка',         face: '#a62c31', rim: '#f2c230', rim2: '#1c2f5e', src: 'полтавські писанки'},
+  kovana:   {n: 'Кована',          face: '#1f3d2b', rim: '#c9a24a', rim2: '#e9dfc6', src: 'ковані хрести з сонцем і сяйво на шпилі'},
+  vitrazh:  {n: 'Вітраж',          face: '#2f6b4f', rim: '#e5b53a', rim2: '#c0392b', src: 'вітражі з деревом життя'},
+};
+Object.values(PALS).forEach(p => { p.edge = p.rim; });
+const VARIANTS = [
+  {id: 'rozetka',   n: 'Розетка',     N: 12, rin: .50, prof: 'convex',  alt: 0,   z: {center: 'rosette', base: 'lens', tip: 'chain_tri'}, pal: 'lypa', col: ['#dcc59b', '#7a1418'],
+   d: 'Шестипелюсткові розетки довкола серцевини, мигдалики й ланцюжки трикутних виїмок, як на різьблених тарелях і полицях.'},
+  {id: 'vykhor',    n: 'Вихор',       N: 12, rin: .50, prof: 'sharp',   alt: 0,   z: {center: 'whirl', base: 'chain_tri', tip: 'dot'}, pal: 'black', col: ['#5b2a86', '#f2c230'],
+   d: 'Вихрова розетка із серпів у серцевині — знак сонця з різьблених тарелів і скринь.'},
+  {id: 'myhdal',    n: 'Мигдалики',   N: 16, rin: .52, prof: 'sharp',   alt: 0,   z: {center: 'lens', base: 'lens', tip: 'dot'}, pal: 'ochre', col: ['#d9952a', '#5a1424'],
+   d: 'Зірка з мигдаликів, як восьмипроменеві розетки на різьблених тарелях, тільки з шістнадцятьма променями.'},
+  {id: 'zubchyky',  n: 'Зубчики',     N: 16, rin: .50, prof: 'concave', alt: 0,   z: {center: 'triin', base: 'chain_tri', tip: 'tri'}, pal: 'orange', col: ['#c8552a', '#f6d27a'],
+   d: 'Виїмчасте різьблення: трикутні «зубчики» ланцюжком уздовж кожного променя.'},
+  {id: 'trylystnyk',n: 'Трилисник',   N: 12, rin: .50, prof: 'convex',  alt: 0,   z: {center: 'lobes3', base: 'lobes3', tip: 'dot'}, pal: 'lypa', col: ['#e9d8b4', '#2f6b3a'],
+   d: 'Трилисті прорізи, як у бічних стінках різьблених полиць.'},
+  {id: 'khrest',    n: 'Хрестоцвіт',  N: 12, rin: .48, prof: 'concave', alt: 0,   z: {center: 'lobes4', base: 'rhombus', tip: 'dot'}, pal: 'kovana', col: ['#2338a8', '#f2c230'],
+   d: 'Чотирилисники й ромби на увігнутих променях, як на кованих хрестах із сонцем.'},
+  {id: 'kryn',      n: 'Крин',        N: 12, rin: .52, prof: 'convex',  alt: 0,   z: {center: 'tulip', base: 'tulip', tip: 'dot'}, pal: 'majolica', col: ['#1d8a86', '#f4e6c4'],
+   d: 'Крини-тюльпани, як на майоліковому панно біля сходів будинку земства.'},
+  {id: 'kakhlia',   n: 'Кахля',       N: 16, rin: .52, prof: 'sharp',   alt: 0,   z: {center: 'hexa', base: 'sprig', tip: 'none'}, pal: 'tiles', col: ['#9dbb4a', '#23367a'],
+   d: 'Гілочки й шестикутники в кольорах зелених кахлів вестибюля.'},
+  {id: 'vezha',     n: 'Вежа',        N: 12, rin: .47, prof: 'tower',   alt: 0,   z: {center: 'hexa', base: 'window', tip: 'rhombus'}, pal: 'brick', col: ['#b4513a', '#e2d3b0'],
+   d: 'Промені-вежі з вікнами модерну, як вежі будинку земства.'},
+  {id: 'makivka',   n: 'Маківка',     N: 12, rin: .48, prof: 'dome',    alt: 0,   z: {center: 'window', base: 'lens', tip: 'dot'}, pal: 'indigo', col: ['#3d7cc4', '#f6d36b'],
+   d: 'Промені-маківки дерев\'яних церков із книги Щербаківського 1913 року.'},
+  {id: 'yarusna',   n: 'Ярусна',      N: 12, rin: .46, prof: 'tiers',   alt: 0,   z: {center: 'dropin', base: 'window', tip: 'none'}, pal: 'green', col: ['#8a5a2e', '#f2c230'],
+   d: 'Промені-храми: зруби з піддашшями, прямий намет і маківка, як ярусні дерев\'яні церкви з книги Щербаківського 1913 року.'},
+  {id: 'plakhta',   n: 'Плахта',      N: 16, rin: .50, prof: 'sharp',   alt: 0,   z: {center: 'steprh', base: 'chain_rh', tip: 'none'}, pal: 'pysanka', col: ['#a62c31', '#f2c230'],
+   d: 'Ткана ступінчаста зірка з ланцюжками ромбів.'},
+  {id: 'siaivo',    n: 'Сяйво',       N: 16, rin: .60, prof: 'spike',   alt: 0,   z: {center: 'arcring', base: 'dot', tip: 'none'}, pal: 'kovana', col: ['#1f4d33', '#e8c050'],
+   d: 'Коло-сяйво з тонкими променями, як сонце на шпилі вежі музею.'},
+  {id: 'derevo',    n: 'Дерево життя',N: 12, rin: .50, prof: 'convex',  alt: 0,   z: {center: 'dropin', base: 'sprig', tip: 'dot'}, pal: 'vitrazh', col: ['#2e8a5a', '#f6d27a'],
+   d: 'Гілочки дерева життя з майоліки й вітражів будинку земства.'},
+  {id: 'pysanka',   n: 'Писанка',     N: 16, rin: .50, prof: 'sharp',   alt: .78, z: {center: 'rhombus', base: 'lens', tip: 'dot'}, pal: 'sun', col: ['#f2b632', '#b3202a'],
+   d: 'Довгі й короткі промені через один, як вісімка-рожа на писанці.'},
+  {id: 'herb',      n: 'Герб',        N: 12, rin: .50, prof: 'convex',  alt: 0,   z: {center: 'hexa', base: 'whirl', tip: 'chain_dot'}, pal: 'majolica', col: ['#2a4c8c', '#e9dfc6'],
+   d: 'Шестикутники й завитки, як рамки гербів повітів на фасаді.'},
+  {id: 'sonechko',  n: 'Сонечко',     N: 20, rin: .60, prof: 'concave', alt: 0,   z: {center: 'rosette', base: 'lens', tip: 'none'}, pal: 'orange', col: ['#ef7d22', '#1f4d33'],
+   d: 'Двадцять тонких променів і вінок розеток довкола серцевини.'},
+  {id: 'stupinchasta', n: 'Ступінчаста', N: 12, rin: .48, prof: 'steps', alt: 0, z: {center: 'steprh', base: 'steprh', tip: 'rhombus'}, pal: 'vyshyvka', col: ['#efe7d8', '#b0272d'],
+   d: 'Уступчасті промені й ступінчасті ромби, як у вишивці та тканих візерунках.'}
+];
+
+/* ================= стан ================= */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FORMATS = {A4: [210, 297], A3: [297, 420], A2: [420, 594]};
+const PARTS = {full: {n: 'Вся звізда', k: 1}, half: {n: 'Половина', k: 2}, quarter: {n: 'Чверть', k: 4}};
+const st = {vid: 'rozetka', edits: {}, fmt: 'A4', part: 'full', tab: true, fill: false, player: 'back',
+            layer: {on: false, vid: 'myhdal', s: 0.55, mode: 'counter', link: true, pal: null, face: null, rim: null, edge: null, halo: 44, shadow: 2, geo: {}}, a: 0, v: 0, auto: !reduce, drag: null};
+const base = id => VARIANTS.find(v => v.id === id);
+function cur(){
+  const b = base(st.vid), e = st.edits[st.vid] || {}, p = PALS[b.pal];
+  return {N: e.N ?? b.N, rin: e.rin ?? b.rin, prof: e.prof ?? b.prof, alt: e.alt ?? b.alt, ajur: e.ajur ?? 1,
+          z: Object.assign({}, b.z, e.z || {}), face: e.face ?? b.col?.[0] ?? p.face, rim: e.rim ?? b.col?.[1] ?? p.rim, edge: e.edge ?? b.col?.[1] ?? p.edge, rimw: e.rimw ?? 24, pal: e.pal ?? b.pal,
+          deco: e.deco ?? 'none', dcol: e.dcol ?? '#c9a24a', dsize: e.dsize ?? 1, devery: e.devery ?? 'all', dhole: e.dhole ?? true};
+}
+function edit(patch){ const e = st.edits[st.vid] || (st.edits[st.vid] = {}); Object.assign(e, patch); save(); render(); }
+let saveT = 0;
+function save(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 250); }
+function saveNow(){ try{ localStorage.setItem('k-zvizda-2', JSON.stringify({vid: st.vid, edits: st.edits, layer: st.layer, player: st.player, fmt: st.fmt, part: st.part, tab: st.tab, fill: st.fill})); }catch(e){} }
+function load(){ try{ const s = JSON.parse(localStorage.getItem('k-zvizda-2') || '{}', (k, v) => k === 'prof' && !PROFILES[v] ? 'lancet' : v);   /* прибрані форми пелюсток → «Сливки» */ if (s.vid && base(s.vid)) st.vid = s.vid; if (s.edits) st.edits = s.edits; if (s.layer && base(s.layer.vid)) Object.assign(st.layer, s.layer, {on: false, link: true, pal: null, face: null, rim: null, edge: null}); /* при відкритті шар вимкнений, кольори — під основну звізду */ if (s.player) st.player = s.player; ['fmt', 'part'].forEach(k => { if (s[k]) st[k] = s[k]; }); if (typeof s.tab === 'boolean') st.tab = s.tab; if (typeof s.fill === 'boolean') st.fill = s.fill; }catch(e){} }
+
+/* ================= мова сторінки =================
+   Сторінка пишеться українською; англійська накладається поверх: точні відповідники з EN,
+   складені рядки з числами — за шаблонами EN_RX. Спостерігач перекладає все, що з'являється
+   на сторінці після перемальовування, а при поверненні на українську відновлюються оригінали. */
+let LANG = 'uk';
+try{ LANG = location.hash === '#en' ? 'en' : location.hash === '#uk' ? 'uk' : localStorage.getItem('k-lang') === 'en' ? 'en' : 'uk'; }catch(e){}
+const EN = %%I18N_EN%%;
+const CYR = /[А-Яа-яІіЇїЄєҐґ]/;
+const lc1 = t => t.charAt(0).toLowerCase() + t.slice(1);
+const EN_RX = [
+  [/^(\d+) варіантів$/, '$1 variants'],
+  [/^(\d+) променів$/, '$1 rays'],
+  [/^(\d+) прорізів$/, '$1 cutouts'],
+  [/^прорізи (\d+) %$/, 'open area $1 %'],
+  [/^(\d+) % радіуса$/, '$1 % of radius'],
+  [/^([\d.,]+) мм на Ø2400$/, '$1 mm at Ø2400'],
+  [/^Ø ([\d.,]+) см$/, 'Ø $1 cm'],
+  [/^Ø звізди ([\d.,]+) см$/, 'star Ø $1 cm'],
+  [/^(A\d) (\d+)×(\d+) мм$/, '$1 $2×$3 mm'],
+  [/^вирізати (\d+) шт\.$/, (m, n) => `cut ${n} ${n === '1' ? 'piece' : 'pieces'}`],
+  [/^Не вміщується: (.*)\. Допоможуть .*$/, (m, l) => `Doesn't fit: ${l.split(', ').map(loc).join(', ')}. A simpler motif, fewer rays, a wider center or a convex ray shape can help.`],
+  [/^«(.+)» у зоні «(.+)»$/, (m, a, b) => `“${loc(a)}” in the ${loc(b)} zone`],
+  [/^«(.+)»$/, (m, a) => `“${loc(a)}”`],
+  [/^(.+) ×(\d+)$/, (m, a, k) => `${loc(a)} ×${k}`],
+];
+function locCore(t){
+  if (EN[t] != null) return EN[t];
+  const up = t.charAt(0).toUpperCase() + t.slice(1);
+  if (up !== t && EN[up] != null) return lc1(EN[up]);
+  for (const [rx, r] of EN_RX) if (rx.test(t)) return t.replace(rx, r);
+  if (t.includes(' · ')) return t.split(' · ').map(x => CYR.test(x) ? locCore(x) : x).join(' · ');
+  if (/[.:]$/.test(t)){ const h = t.slice(0, -1), r = locCore(h); if (r !== h) return r + t.slice(-1); }
+  return t;
+}
+function loc(s){   // переклад рядка на поточну мову сторінки
+  if (LANG !== 'en' || !s || !CYR.test(s)) return s;
+  const lead = s.match(/^\s*/)[0], tail = s.match(/\s*$/)[0];
+  return lead + locCore(s.trim().replace(/\s+/g, ' ')) + tail;
+}
+const ORIG = new WeakMap(), I18N_ATTRS = ['title', 'aria-label'];
+function locText(n){
+  const r = ORIG.get(n);
+  if (r && n.data === r.en) return;
+  const uk = n.data, en = loc(uk);
+  if (en !== uk){ ORIG.set(n, {uk, en}); n.data = en; }
+}
+function locAttrs(el){
+  if (!el.getAttribute) return;
+  const rec = ORIG.get(el) || {};
+  I18N_ATTRS.forEach(a => {
+    const v = el.getAttribute(a); if (!v) return;
+    if (rec[a] && v === rec[a].en) return;
+    const en = loc(v); if (en !== v){ rec[a] = {uk: v, en}; ORIG.set(el, rec); el.setAttribute(a, en); }
+  });
+}
+function walk(root, fn, fe){
+  if (root.nodeType === 3) return fn(root);
+  if (root.nodeType !== 1 || /^(SCRIPT|STYLE)$/.test(root.nodeName)) return;
+  fe && fe(root);
+  const it = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {acceptNode: n => n.nodeType === 1 && /^(SCRIPT|STYLE)$/.test(n.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT});
+  for (let n = it.nextNode(); n; n = it.nextNode()) n.nodeType === 3 ? fn(n) : fe && fe(n);
+}
+const i18nObs = new MutationObserver(ms => {
+  if (LANG !== 'en') return;
+  ms.forEach(m => {
+    if (m.type === 'characterData') locText(m.target);
+    else if (m.type === 'attributes') locAttrs(m.target);
+    else m.addedNodes.forEach(n => walk(n, locText, locAttrs));
+  });
+});
+function setLang(l, user){
+  LANG = l;
+  if (user) try{ localStorage.setItem('k-lang', l); }catch(e){}
+  document.documentElement.lang = l === 'en' ? 'en' : 'uk';
+  document.title = l === 'en' ? 'Star Builder' : 'Конструктор звізд';
+  $('h1').innerHTML = l === 'en' ? 'Star <em>Builder</em>' : 'Конструктор <em>звізд</em>';
+  sheetKey = ''; renderSheet();   // підписи на викрійці будуються вже потрібною мовою
+  if (l === 'en') walk(document.body, locText, locAttrs);
+  else walk(document.body, n => { const r = ORIG.get(n); if (r && n.data === r.en) n.data = r.uk; },
+                          el => { const r = ORIG.get(el); if (r) Object.entries(r).forEach(([a, v]) => { if (el.getAttribute(a) === v.en) el.setAttribute(a, v.uk); }); });
+  $$('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
+  i18nObs.disconnect();
+  if (l === 'en') i18nObs.observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS});
+}
+
+/* ================= інтерфейс ================= */
+function thumb(v){
+  const s = buildStar({N: v.N, rin: v.rin, prof: v.prof, alt: v.alt, z: v.z}), p = {face: v.col?.[0] ?? PALS[v.pal].face, edge: v.col?.[1] ?? PALS[v.pal].edge};
+  return `<svg viewBox="-1230 -1230 2460 2460" aria-hidden="true"><path fill-rule="evenodd" fill="${p.face}" stroke="${p.edge}" stroke-width="30" d="${starD(s)}"/></svg>`;
+}
+function buildUI(){
+  $('#gallery').innerHTML = VARIANTS.map(v => `<button type="button" class="vt" data-id="${v.id}">${thumb(v)}<span>${v.n}</span></button>`).join('');
+  $$('#gallery .vt').forEach(b => b.addEventListener('click', () => { st.vid = b.dataset.id; save(); render(); }));
+  $('#v-count').textContent = VARIANTS.length + ' варіантів';
+  $('#n').innerHTML = [8, 10, 12, 14, 16, 18, 20, 24].map(n => `<option value="${n}">${n}</option>`).join('');
+  $('#prof').innerHTML = Object.entries(PROFILES).map(([k, p]) => `<option value="${k}">${p.n}</option>`).join('');
+  const zopts = MOTIF_ORDER.map(k => `<option value="${k}">${k === 'none' ? 'без прорізу' : MOTIF[k].n}</option>`).join('');
+  ['center', 'base', 'tip'].forEach(z => { $('#z-' + z).innerHTML = zopts; $('#z-' + z).addEventListener('change', e => { const c = cur(); edit({z: Object.assign({}, c.z, {[z]: e.target.value})}); }); });
+  $('#n').addEventListener('change', e => edit({N: +e.target.value}));
+  $('#prof').addEventListener('change', e => edit({prof: e.target.value}));
+  $('#alt').addEventListener('change', e => edit({alt: +e.target.value}));
+  $('#rin').addEventListener('input', e => edit({rin: +e.target.value / 100}));
+  $('#ajur').addEventListener('input', e => edit({ajur: +e.target.value / 100}));
+  $('#rimw').addEventListener('input', e => edit({rimw: +e.target.value}));
+  ['face', 'rim', 'edge'].forEach(c => $('#c-' + c).addEventListener('input', e => edit({[c]: e.target.value})));
+  $('#pals').innerHTML = Object.entries(PALS).map(([k, p]) => `<button type="button" class="chip" data-k="${k}" title="${p.src}"><span class="sw"><i style="background:${p.face}"></i><i style="background:${p.rim}"></i><i style="background:${p.rim2}"></i></span>${p.n}</button>`).join('');
+  $$('#pals .chip').forEach(b => b.addEventListener('click', () => { const p = PALS[b.dataset.k]; edit({pal: b.dataset.k, face: p.face, rim: p.rim, edge: p.edge}); }));
+  $('#reset').addEventListener('click', () => { delete st.edits[st.vid]; save(); render(); });
+  $('#fmt').innerHTML = Object.keys(FORMATS).map(k => `<button type="button" class="chip" data-k="${k}">${k} · ${FORMATS[k][0]}×${FORMATS[k][1]}</button>`).join('');
+  $$('#fmt .chip').forEach(b => b.addEventListener('click', () => { st.fmt = b.dataset.k; save(); renderSheet(); }));
+  $('#part').innerHTML = Object.entries(PARTS).map(([k, p]) => `<button type="button" class="chip" data-k="${k}">${p.n}</button>`).join('');
+  $$('#part .chip').forEach(b => b.addEventListener('click', () => { st.part = b.dataset.k; save(); renderSheet(); }));
+  $('#tab').addEventListener('change', e => { st.tab = e.target.checked; save(); renderSheet(); });
+  $('#fill').addEventListener('change', e => { st.fill = e.target.checked; save(); renderSheet(); });
+  $('#dl-pdf').addEventListener('click', () => download('pdf'));
+  $('#dl-svg').addEventListener('click', () => download('svg'));
+  $('#b-auto').addEventListener('click', () => { st.auto = !st.auto; $('#b-auto').textContent = st.auto ? 'Пауза' : 'Крутити'; });
+  // на весь екран: Fullscreen API, а де його немає для елементів (iPhone) — плеєр розтягується поверх сторінки
+  const stage = $('#stage'), isFull = () => document.fullscreenElement === stage || stage.classList.contains('full');
+  const showFull = () => { const f = isFull(); $('#b-full').textContent = f ? 'Згорнути' : 'На весь екран'; $('#b-full').setAttribute('aria-pressed', f); };
+  const fallback = on => { stage.classList.toggle('full', on); document.body.classList.toggle('no-scroll', on); showFull(); };
+  $('#b-full').addEventListener('click', () => {
+    if (isFull()){ if (document.fullscreenElement) document.exitFullscreen(); return fallback(false); }
+    if (!stage.requestFullscreen) return fallback(true);
+    // деякі вбудовані переглядачі мовчки ігнорують запит — тоді через пів секунди вмикається запасний варіант
+    const t = setTimeout(() => { if (!document.fullscreenElement) fallback(true); }, 500);
+    stage.requestFullscreen().then(() => clearTimeout(t), () => { clearTimeout(t); fallback(true); });
+  });
+  document.addEventListener('fullscreenchange', showFull);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && stage.classList.contains('full')) fallback(false); });
+  $('#decos').innerHTML = Object.entries(DECOS).map(([k, d]) => `<button type="button" class="chip" data-k="${k}">${d.n}</button>`).join('');
+  $$('#decos .chip').forEach(b => b.addEventListener('click', () => edit({deco: b.dataset.k})));
+  $('#d-color').addEventListener('input', e => edit({dcol: e.target.value}));
+  $('#d-every').addEventListener('change', e => edit({devery: e.target.value}));
+  $('#d-size').addEventListener('input', e => edit({dsize: +e.target.value / 100}));
+  $('#d-hole').addEventListener('change', e => edit({dhole: e.target.checked}));
+  renderOrigins();
+  // вкладки налаштувань — лише на вузькому екрані (CSS); на комп'ютері видно всі групи одразу
+  const setPane = (k, jump) => {
+    $$('.mtabs .tab').forEach(t => t.setAttribute('aria-selected', t.dataset.k === k));
+    $$('.panel[data-mob] [data-pane]').forEach(p => p.classList.toggle('on', p.dataset.pane === k));
+    try{ localStorage.setItem('k-pane', k); }catch(e){}
+    if (!jump) return;
+    const tabs = $('.mtabs'), on = $('.mtabs .tab[aria-selected="true"]');
+    tabs.scrollTo({left: on.offsetLeft - (tabs.clientWidth - on.offsetWidth) / 2, behavior: 'smooth'});
+    const top = tabs.getBoundingClientRect().top, stuck = parseFloat(getComputedStyle(tabs).top);
+    if (top <= stuck + 1) scrollTo({top: scrollY + $('.panel[data-mob]').getBoundingClientRect().top - stuck - 2});
+  };
+  $$('.mtabs .tab').forEach(t => t.addEventListener('click', () => setPane(t.dataset.k, true)));
+  let pane0 = 'base'; try{ pane0 = localStorage.getItem('k-pane') || 'base'; }catch(e){}
+  setPane($$('.mtabs .tab').some(t => t.dataset.k === pane0) ? pane0 : 'base');
+  // перемикач теми сторінки: запам'ятовується; без вибору сторінка відкривається в темній темі
+  const dark = matchMedia('(prefers-color-scheme: dark)');
+  const showTheme = () => { const t = document.documentElement.dataset.theme || (dark.matches ? 'dark' : 'light');
+    $$('.theme button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t)); };
+  try{ const t = localStorage.getItem('k-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; }catch(e){}
+  $$('.theme button').forEach(b => b.addEventListener('click', () => {
+    document.documentElement.dataset.theme = b.dataset.t; try{ localStorage.setItem('k-theme', b.dataset.t); }catch(e){} showTheme(); }));
+  dark.addEventListener?.('change', showTheme); showTheme();
+  $('#l-vid').innerHTML = VARIANTS.map(v => `<option value="${v.id}">${v.n}</option>`).join('');
+  const L = patch => { Object.assign(st.layer, patch); save(); render(); };
+  $('#l-on').addEventListener('change', e => L({on: e.target.checked}));
+  $('#l-vid').addEventListener('change', e => L({vid: e.target.value, face: null, rim: null, edge: null, geo: {}}));
+  // форма й орнамент другого шару — власні налаштування поверх його основи
+  $('#l-n').innerHTML = $('#n').innerHTML; $('#l-prof').innerHTML = $('#prof').innerHTML; $('#l-alt').innerHTML = $('#alt').innerHTML;
+  ['l-zc', 'l-zb', 'l-zt'].forEach(id => $('#' + id).innerHTML = $('#z-center').innerHTML);
+  const G = patch => L({geo: Object.assign({}, st.layer.geo, patch)});
+  $('#l-n').addEventListener('change', e => G({N: +e.target.value}));
+  $('#l-prof').addEventListener('change', e => G({prof: e.target.value}));
+  $('#l-alt').addEventListener('change', e => G({alt: +e.target.value}));
+  $('#l-rin').addEventListener('input', e => G({rin: +e.target.value / 100}));
+  $('#l-ajur').addEventListener('input', e => G({ajur: +e.target.value / 100}));
+  [['l-zc', 'center'], ['l-zb', 'base'], ['l-zt', 'tip']].forEach(([id, z]) => $('#' + id).addEventListener('change', e => G({z: Object.assign({}, st.layer.geo?.z, {[z]: e.target.value})})));
+  $('#l-reset').addEventListener('click', () => L({geo: {}}));
+  $('#l-mode').addEventListener('change', e => L({mode: e.target.value}));
+  $('#l-size').addEventListener('input', e => L({s: +e.target.value / 100}));
+  // ручна зміна кольору відв'язує шар від основної звізди, решта кольорів лишається як були на екрані
+  ['face', 'rim', 'edge'].forEach(k => $('#l-' + k).addEventListener('input', e => { const c2 = L2C(); L({link: false, pal: null, face: c2.face, rim: c2.rim, edge: c2.edge, [k]: e.target.value}); }));
+  $('#l-pals').innerHTML = Object.entries(PALS).map(([k, p]) => `<button type="button" class="chip" data-k="${k}" title="${p.src}"><span class="sw"><i style="background:${p.face}"></i><i style="background:${p.rim}"></i><i style="background:${p.rim2}"></i></span>${p.n}</button>`).join('');
+  $('#l-pals').insertAdjacentHTML('afterbegin', '<button type="button" class="chip" data-k="auto" title="Кольори виводяться з кольорів основної звізди"><span class="sw" id="l-auto-sw"><i></i><i></i></span>Під основну звізду</button>');
+  $$('#l-pals .chip').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.k === 'auto') return L({link: true, pal: null, face: null, rim: null, edge: null});
+    const p = PALS[b.dataset.k]; L({link: false, pal: b.dataset.k, face: p.face, rim: p.rim, edge: p.edge}); }));
+  $('#l-halo').addEventListener('change', e => L({halo: +e.target.value}));
+  $('#l-shadow').addEventListener('change', e => L({shadow: +e.target.value}));
+  $('#player').innerHTML = '<button type="button" class="chip" data-k="back">Задній шар</button><button type="button" class="chip" data-k="front">Другий шар</button>';
+  $$('#player .chip').forEach(b => b.addEventListener('click', () => { st.player = b.dataset.k; save(); renderSheet(); }));
+}
+
+let STAR = null, drawn = null;
+const STARS = new Map();
+function starOf(c){
+  const on = !!c.deco && c.deco !== 'none', k = JSON.stringify([c.N, c.rin, c.prof, c.alt, c.ajur, c.z, on && c.devery, on && c.dhole]);
+  let s = STARS.get(k);
+  if (!s){
+    s = buildStar(c);
+    const memo = {}; s.fit = (z, m) => memo[z + m] ??= s.fitsZone(z, m);
+    STARS.set(k, s); if (STARS.size > 60) STARS.delete(STARS.keys().next().value);
+  }
+  return s;
+}
+// підписи «не вміщується» в списках мотивів — коли повзунок зупинився, щоб не гальмувати перетягування
+let labelT = 0;
+function labelZones(){
+  clearTimeout(labelT);
+  labelT = setTimeout(() => {
+    const lab = (sel, star, z) => [...sel.options].forEach(o => { o.textContent = (o.value === 'none' ? 'без прорізу' : MOTIF[o.value].n) + (star.fit(z, o.value) ? '' : ' · не вміщується'); });
+    ['center', 'base', 'tip'].forEach(z => lab($('#z-' + z), STAR, z));
+    if (STAR2) [['l-zc', 'center'], ['l-zb', 'base'], ['l-zt', 'tip']].forEach(([id, z]) => lab($('#' + id), STAR2, z));
+  }, 200);
+}
+const paint = (id, prop, val) => { const el = $(id); if (el.style[prop] !== val) el.style[prop] = val; };
+let queued = false;
+function render(){ if (!queued){ queued = true; requestAnimationFrame(() => { queued = false; renderNow(); }); } }
+function renderNow(){
+  const c = cur(), v = base(st.vid);
+  STAR = starOf(c);
+  if (drawn !== STAR){
+    drawn = STAR;
+    const d = starD(STAR);
+    $('#k-face').setAttribute('d', d); $('#k-edge').setAttribute('d', d); $('#k-clip-path').setAttribute('d', d);
+    $('#k-rim').setAttribute('d', holesD(STAR));
+    labelZones();
+  }
+  paint('#k-rim', 'strokeWidth', c.rimw + 'px');
+  paint('#k-face', 'fill', c.face); paint('#k-rim', 'stroke', c.rim); paint('#k-edge', 'stroke', c.edge);
+  $('#k-defs').style.setProperty('--deco', c.dcol);
+  renderDeco(c);
+  renderLayer();
+  $$('#gallery .vt').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === st.vid));
+  $$('#pals .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === c.pal && c.face === PALS[c.pal].face && c.rim === PALS[c.pal].rim && c.edge === PALS[c.pal].edge));
+  $('#n').value = c.N; $('#prof').value = c.prof; $('#alt').value = String(c.alt); if (![...$('#alt').options].some(o => o.value === String(c.alt))) $('#alt').value = '0';
+  $('#rin').value = Math.round(c.rin * 100); $('#rin-out').textContent = Math.round(c.rin * 100) + ' % радіуса';
+  $('#ajur').value = Math.round(c.ajur * 100); $('#ajur-out').textContent = Math.round(c.ajur * 100) + ' %';
+  $('#rimw').value = c.rimw; $('#rimw-out').textContent = c.rimw ? (c.rimw / 2) + ' мм на Ø2400' : 'без обвідки';
+  const miss = [];
+  ['center', 'base', 'tip'].forEach(z => {
+    const sel = $('#z-' + z);
+    sel.value = c.z[z] || 'none';
+    if (!STAR.fit(z, sel.value)) miss.push(`«${MOTIF[sel.value].n}» у зоні «${ZONE_NAMES[z]}»`);
+  });
+  $('#z-note').textContent = miss.length ? `Не вміщується: ${miss.join(', ')}. Допоможуть простіший мотив, менше променів, ширша серцевина або опукла форма променя.` : '';
+  $('#z-note').hidden = !miss.length;
+  $('#c-face').value = c.face; $('#c-rim').value = c.rim; $('#c-edge').value = c.edge;
+  const edited = !!st.edits[st.vid];
+  $('#desc').innerHTML = `<b>${v.n}.</b> ${v.d}` + (edited ? ' <i>Змінено в конструкторі.</i>' : '');
+  $('#reset').hidden = !edited;
+  $('#cap-name').textContent = v.n + ' · ' + c.N + ' променів';
+  $('#stats').innerHTML = `<span>${c.N} променів</span><span>${STAR.holes.length} прорізів</span><span>прорізи ${Math.round(STAR.openPct)} %</span>`;
+  renderSheet();
+}
+
+/* ================= прикраси на кінчиках ================= */
+const STR = L => `<line x1="0" y1="0" x2="0" y2="${f1(L)}" style="stroke:#eadfc4;stroke-width:3"/>`;
+const DARK = 'color-mix(in srgb, var(--deco) 60%, #000)';
+const DECOS = {
+  none:   {n: 'Без прикрас'},
+  pompom: {n: 'Бубочки', hang: true, svg: r => {
+    const L = r * 1.5, pts = [];
+    for (let i = 0; i < 44; i++){ const a = i * TAU / 44, rr = r * (i % 2 ? 0.84 : 1.05); pts.push(f1(rr * Math.cos(a)) + ' ' + f1(L + r + rr * Math.sin(a))); }
+    return STR(L) + `<path d="M${pts.join('L')}Z" style="fill:var(--deco);stroke:${DARK};stroke-width:2"/><circle cx="${f1(-r * .3)}" cy="${f1(L + r * .7)}" r="${f1(r * .32)}" style="fill:#fff;opacity:.22"/>`; }},
+  bell:   {n: 'Дзвіночки', hang: true, svg: r => {
+    const T = r * 1.2;
+    return STR(T) + `<circle cx="0" cy="${f1(T + r * .05)}" r="${f1(r * .13)}" style="fill:none;stroke:${DARK};stroke-width:3"/>` +
+      `<path d="M${f1(-r * .22)} ${f1(T + r * .18)}C${f1(-r * .25)} ${f1(T + r * .9)} ${f1(-r * .62)} ${f1(T + r * 1.3)} ${f1(-r * .98)} ${f1(T + r * 1.85)}Q0 ${f1(T + r * 2.1)} ${f1(r * .98)} ${f1(T + r * 1.85)}C${f1(r * .62)} ${f1(T + r * 1.3)} ${f1(r * .25)} ${f1(T + r * .9)} ${f1(r * .22)} ${f1(T + r * .18)}Q0 ${f1(T - r * .02)} ${f1(-r * .22)} ${f1(T + r * .18)}Z" style="fill:url(#deco-gold);stroke:${DARK};stroke-width:2"/>` +
+      `<circle cx="0" cy="${f1(T + r * 2.12)}" r="${f1(r * .2)}" style="fill:${DARK}"/>`; }},
+  ball:   {n: 'Кульки', hang: true, svg: r => STR(r * 1.4) + `<circle cx="0" cy="${f1(r * 2.4)}" r="${f1(r)}" style="fill:url(#deco-ball)"/>`},
+  beads:  {n: 'Намистини', hang: true, svg: r => {
+    let o = STR(r * 2.9), y = r * .55;
+    [.36, .31, .27, .23].forEach(k => { y += r * k; o += `<circle cx="0" cy="${f1(y)}" r="${f1(r * k)}" style="fill:url(#deco-ball)"/>`; y += r * k + r * .12; });
+    return o; }},
+  tassel: {n: 'Китиці', hang: true, svg: r => {
+    const T = r * 1.1; let o = STR(T) + `<circle cx="0" cy="${f1(T + r * .28)}" r="${f1(r * .3)}" style="fill:var(--deco)"/>`;
+    for (let i = 0; i <= 12; i++){ const x = -r * .34 + i * r * .68 / 12; o += `<line x1="${f1(x)}" y1="${f1(T + r * .5)}" x2="${f1(x * 1.6)}" y2="${f1(T + r * 2.5)}" style="stroke:var(--deco);stroke-width:${f1(r * .1)};stroke-linecap:round"/>`; }
+    return o + `<rect x="${f1(-r * .42)}" y="${f1(T + r * .55)}" width="${f1(r * .84)}" height="${f1(r * .2)}" rx="${f1(r * .06)}" style="fill:${DARK}"/>`; }},
+  ribbon: {n: 'Стрічки', hang: true, svg: r =>
+    `<path d="M0 0C${f1(r * .6)} ${f1(r * .9)} ${f1(-r * .55)} ${f1(r * 1.7)} ${f1(r * .3)} ${f1(r * 2.8)}" style="fill:none;stroke:var(--deco);stroke-width:${f1(r * .32)};stroke-linecap:round"/>` +
+    `<path d="M0 0C${f1(-r * .65)} ${f1(r * .7)} ${f1(r * .35)} ${f1(r * 1.8)} ${f1(-r * .45)} ${f1(r * 2.5)}" style="fill:none;stroke:${DARK};stroke-width:${f1(r * .26)};stroke-linecap:round"/>` +
+    `<circle r="${f1(r * .22)}" style="fill:var(--deco)"/>`},
+  star:   {n: 'Зірочки', hang: false, svg: r => {
+    const pts = []; for (let i = 0; i < 16; i++){ const a = i * Math.PI / 8 - Math.PI / 2, rr = r * (i % 2 ? .45 : 1.1); pts.push(f1(rr * Math.cos(a)) + ' ' + f1(rr * Math.sin(a))); }
+    return `<path d="M${pts.join('L')}Z" style="fill:var(--deco);stroke:${DARK};stroke-width:2"/>`; }},
+  light:  {n: 'Вогники', hang: false, svg: r => `<circle r="${f1(r * 2.4)}" style="fill:url(#deco-glow)"/><circle r="${f1(r * .35)}" style="fill:#fffbe8"/>`},
+};
+let HANG = [], decoKey = '', decoStar = null;
+function renderDeco(c){
+  const D = DECOS[c.deco] || DECOS.none, r = 44 * c.dsize, item = D.svg ? D.svg(r).replaceAll('var(--deco)', c.dcol) : '';
+  const key = [c.deco, c.dsize, c.dcol].join('|');
+  const vb = 1330 + (D.svg ? (D.hang ? 150 : 60) * c.dsize : 0);
+  $('#stage-svg').setAttribute('viewBox', `${-vb} ${-vb} ${2 * vb} ${2 * vb}`);
+  if (key !== decoKey || decoStar !== STAR){
+  decoKey = key; decoStar = STAR;
+  const fix = D.svg && !D.hang ? STAR.anchors.map(p => `<g transform="translate(${f1(p[0])} ${f1(p[1])})">${item}</g>`).join('') : '';
+  const hang = D.svg && D.hang ? STAR.anchors.map((p, i) => `<g class="dk" data-i="${i}">${item}</g>`).join('') : '';
+  $$('.deco-fix').forEach(g => g.innerHTML = fix);
+  $$('.deco-hang').forEach(g => g.innerHTML = hang);
+  HANG = $$('.deco-hang .dk').map(g => ({g, svg: g.ownerSVGElement, i: +g.dataset.i}));
+  }
+  $$('#decos .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === c.deco));
+  $('#deco-opts').hidden = $('#d-hole-wrap').hidden = c.deco === 'none';
+  $('#d-color').value = c.dcol; $('#d-every').value = c.devery; $('#d-size').value = Math.round(c.dsize * 100); $('#d-hole').checked = c.dhole;
+}
+
+/* ================= другий шар ================= */
+let STAR2 = null, drawn2 = null;
+/* гармонія кольорів другого шару: основа другої — тон обвідки першої з легким зсувом,
+   обвідка другої — глибший або світліший відтінок основи першої, щоб шари споріднені, але не зливалися */
+function hex2hsl(h){
+  const n = parseInt(h.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const hh = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(hh * 60 + 360) % 360, s, l];
+}
+function hsl2hex(h, s, l){
+  s = Math.min(1, Math.max(0, s)); l = Math.min(1, Math.max(0, l));
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return '#' + [r, g, b].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+}
+function harmony(m){
+  const [fh, fs, fl] = hex2hsl(m.face), [rh, rs, rl] = hex2hsl(m.rim);
+  // основа другої: обвідка першої, трохи тепліша й соковитіша
+  const face2 = hsl2hex((rh + (rs > .15 ? 8 : 0)) % 360, rs > .15 ? Math.min(.95, rs * 1.08) : rs, rl);
+  // обвідка другої: тон основи першої — глибокий на світлій основі другої, світлий на темній
+  const light2 = rl > .55;
+  const rim2 = hsl2hex(fh, fs > .12 ? Math.min(.9, Math.max(.45, fs)) : fs, light2 ? Math.min(.32, fl * .7) : Math.max(.74, Math.min(.86, fl + .35)));
+  return {face: face2, rim: rim2, edge: rim2};
+}
+function L2C(){   // налаштування звізди другого шару: її основа зі змінами з галереї й власні кольори шару
+  const b = base(st.layer.vid), e = st.edits[b.id] || {}, p = PALS[e.pal ?? b.pal];
+  const g = st.layer.geo || {};
+  return {N: g.N ?? e.N ?? b.N, rin: g.rin ?? e.rin ?? b.rin, prof: g.prof ?? e.prof ?? b.prof, alt: g.alt ?? e.alt ?? b.alt, ajur: g.ajur ?? e.ajur ?? 1,
+          z: Object.assign({}, b.z, e.z || {}, g.z || {}),
+          rimw: e.rimw ?? 24, ...(st.layer.link !== false
+            ? harmony(cur())   // кольори другої звізди виводяться з кольорів основної
+            : {face: st.layer.face ?? e.face ?? b.col?.[0] ?? p.face, rim: st.layer.rim ?? e.rim ?? b.col?.[1] ?? p.rim, edge: st.layer.edge ?? e.edge ?? b.col?.[1] ?? p.edge})};
+}
+function renderLayer(){
+  const on = st.layer.on, c2 = L2C();
+  STAR2 = on ? starOf(c2) : null;
+  $$('.spin2').forEach(g => on ? g.removeAttribute('hidden') : g.setAttribute('hidden', ''));
+  $('#l-on').checked = on; $('#l-opts').hidden = !on;
+  $('#l-vid').value = st.layer.vid; $('#l-mode').value = st.layer.mode; $('#l-size').value = Math.round(st.layer.s * 100);
+  $('#l-n').value = c2.N; $('#l-prof').value = c2.prof;
+  $('#l-alt').value = [...$('#l-alt').options].some(o => o.value === String(c2.alt)) ? String(c2.alt) : '0';
+  $('#l-rin').value = Math.round(c2.rin * 100); $('#l-rin-out').textContent = Math.round(c2.rin * 100) + ' % радіуса';
+  $('#l-ajur').value = Math.round(c2.ajur * 100); $('#l-ajur-out').textContent = Math.round(c2.ajur * 100) + ' %';
+  $('#l-reset').hidden = !Object.keys(st.layer.geo || {}).length;
+  $('#l-size-out').textContent = Math.round(st.layer.s * 100) + ' %';
+  $('#l-face').value = c2.face; $('#l-rim').value = c2.rim; $('#l-edge').value = c2.edge; 
+  const auto = st.layer.link !== false, hc = harmony(cur());
+  $$('#l-auto-sw i').forEach((el, i) => el.style.background = i ? hc.rim : hc.face);
+  $$('#l-pals .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === 'auto' ? auto : !auto && b.dataset.k === st.layer.pal));
+  const halo = st.layer.halo ?? 44, shadow = st.layer.shadow ?? 2;
+  $('#l-halo').value = String(halo); $('#l-shadow').value = String(shadow);
+  const flt = shadow ? `url(#${shadow === 2 ? 'lift2b' : 'lift2'})` : null;
+  $$('.spin2 use').forEach(u => { if (u.getAttribute('filter') !== flt) flt ? u.setAttribute('filter', flt) : u.removeAttribute('filter'); });
+  if (!on) return;
+  [['l-zc', 'center'], ['l-zb', 'base'], ['l-zt', 'tip']].forEach(([id, z]) => {
+    const sel = $('#' + id);
+    sel.value = c2.z[z] || 'none';
+  });
+  if (drawn2 !== STAR2){
+    drawn2 = STAR2; labelZones();
+    const d = starD(STAR2);
+    $('#k2-face').setAttribute('d', d); $('#k2-edge').setAttribute('d', d); $('#k2-clip-path').setAttribute('d', d);
+    $('#k2-halo').setAttribute('d', shD(P(STAR2.outline)));
+    $('#k2-rim').setAttribute('d', holesD(STAR2));
+  }
+  paint('#k2-halo', 'strokeWidth', halo + 'px'); paint('#k2-halo', 'display', halo ? '' : 'none');
+  paint('#k2-rim', 'strokeWidth', c2.rimw + 'px');
+  paint('#k2-face', 'fill', c2.face); paint('#k2-rim', 'stroke', c2.rim); paint('#k2-edge', 'stroke', c2.edge);
+  paint('#k2-halo', 'stroke', `color-mix(in srgb, ${cur().face} 45%, #fff8ec)`);
+}
+
+/* ================= звідки взялися форми й кольори ================= */
+const ORIGINS = [
+  {t: 'Розетка й вихор', m: ['rosette', 'whirl'],
+   d: 'Шестипелюсткова розетка в колі та вихрова розетка, що ніби закручується, — найчастіші знаки різьби по дереву. Їх вирізають на тарелях, скринях і полицях. На вхідних дверях будинку Полтавського губернського земства розетки в колах «ростуть» на гілках дерева.',
+   u: 'Основи «Розетка», «Вихор», «Сонечко»; форма променя «Сливки».', s: 'Різьблені тарелі й скрині; вхідні двері будинку земства.', ray: 'lancet'},
+  {t: 'Виїмки, мигдалики й горошини', m: ['tri', 'triin', 'lens', 'dot'],
+   d: 'Виїмчасте різьблення будується з трикутних виїмок, видовжених мигдаликів і круглих горошин. З трикутників складають смуги «зубчиків» по краю тареля, з мигдаликів — восьмипелюсткові розетки, а горошини йдуть рядами-намистом.',
+   u: 'Мотиви «Трикутник», «Мигдалик», «Горошина» та ланцюжки з них; основи «Зубчики», «Мигдалики».', s: 'Різьблені тарелі, рубелі, скриньки.'},
+  {t: 'Трилисник і чотирилисник', m: ['lobes3', 'lobes4'],
+   d: 'Трилисті прорізи прикрашають бічні стінки різьблених мисників і полиць. Чотирилисник — хрестоподібна квітка, яку часто бачимо в різьбі й на кованих виробах.',
+   u: 'Основи «Трилисник», «Хрестоцвіт».', s: 'Різьблені полиці й мисники.'},
+  {t: 'Крин і дерево життя', m: ['tulip', 'sprig'],
+   d: 'Тюльпани-крини з розкритими бічними пелюстками й гілки дерева життя з виноградом прикрашають майолікові панно на пілонах і біля сходів будинку земства, а також вітражі його зали. Ці мотиви художники модерну взяли з народного розпису й вишивки.',
+   u: 'Мотиви «Крин», «Гілочка»; основи «Крин», «Дерево життя», «Кахля».', s: 'Майоліка, кахлі й вітражі будинку Полтавського губернського земства (1903–1908, арх. В. Кричевський).'},
+  {t: 'Вікно модерну, вежа й герб', m: ['window', 'trap', 'hexa'],
+   d: 'Будинок земства — пам\'ятка українського архітектурного модерну. Його впізнають за вікнами й порталами у формі трапеції зі зрізаними кутами, за шестикутними рамками гербів повітів губернії на фасаді та за вежами з шатровими дахами.',
+   u: 'Мотиви «Вікно модерну», «Трапеція», «Шестикутник»; форма променя «Вежа»; основи «Вежа», «Герб».', s: 'Фасад будинку земства, нині Полтавський краєзнавчий музей імені Василя Кричевського.'},
+  {t: 'Ярусні храми й маківки', m: [],
+   d: 'Дерев\'яні церкви з книги Володимира Щербаківського 1913 року мають кілька зрубів, що звужуються догори. Кожен ярус прикриває піддашшя, а завершують його шатровий намет, шийка й маківка з хрестом. Цей силует став формою променя: зруби з піддашшями, намет, маківка.',
+   u: 'Форми променя «Ярусний храм», «Маківка»; основи «Ярусна», «Маківка».', s: 'В. Щербаківський, «Українське мистецтво. Деревляне будівництво і різьба на дереві», 1913.', ray: 'tiers'},
+  {t: 'Сяйво', m: ['arcring'],
+   d: 'На шпилі вежі краєзнавчого музею стоїть сонце з променями. Саме це сяйво надихнуло Полтавську різдвяну звізду й айдентику Ходи звіздарів. Близький образ — ковані хрести із сонцем: коло й тонкі промені.',
+   u: 'Мотив «Дуга сяйва»; форма променя «Тонкий»; основи «Сяйво», «Хрестоцвіт».', s: 'Шпиль вежі будинку земства; ковані хрести.', ray: 'spike'},
+  {t: 'Ромби вишивки й плахти', m: ['rhombus', 'steprh'],
+   d: 'Ромб — один із найдавніших знаків вишивки й писанок, його часто тлумачать як засіяне поле. У хрестиковій вишивці й тканих плахтах ромб «збирається з клітинок» і стає ступінчастим. Полтавська вишивка славиться технікою «білим по білому» та стриманою гамою з блакитним, синім, вохристим, коричневим, зеленим і сірим, а плахти тчуть у червоних, білих, зелених і чорних клітинках.',
+   u: 'Мотиви «Ромб», «Ступінчастий ромб», «Ланцюжок ромбів»; форма променя «Ступінчастий»; основи «Плахта», «Ступінчаста».', s: 'Рушники й плахти; Полтавський краєзнавчий музей про полтавську вишивку.', ray: 'steps'},
+  {t: 'Писанка', m: [],
+   d: 'Довгі й короткі промені через один повторюють вісімку-рожу на писанках. Полтавську школу писанкарства описують як рослинні мотиви з ніжними переходами кольорів.',
+   u: 'Налаштування «Через один»; основа «Писанка».', s: 'Писанки.'},
+];
+function motifPreview(k){
+  const m = MOTIF[k]; if (!m) return '';
+  const ctx = {d0: 10, d1: 26, half: 0.5, seam: 4};
+  let sh = [];
+  if (k === 'arcring'){ sh = [m.g(150, 190, 16, {half: 0.35, seam: 4})].filter(Boolean); return sh.length ? `<svg class="pv" viewBox="110 -80 110 160" aria-hidden="true"><path style="fill:var(--ink);opacity:.8" d="${sh.map(shD).join('')}"/></svg>` : ''; }
+  if (m.chain){ let x = 8; [52, 40, 30].forEach((L, i) => { const r = MOTIF[m.chain[i]].g(x, x + L, L * .32, ctx); sh = sh.concat(r || []); x += L + 8; }); }
+  else { const r = m.g(10, 140, k === 'whirl' ? 9 : 34, ctx); sh = Array.isArray(r) ? r : (r ? [r] : []); }
+  return `<svg class="pv" viewBox="-70 -150 140 150" aria-hidden="true"><g transform="rotate(-90)"><path fill-rule="evenodd" style="fill:var(--ink);opacity:.8" d="${sh.map(shD).join('')}"/></g></svg>`;
+}
+function rayPreview(prof){
+  const s = buildStar({N: 12, rin: .48, prof, alt: 0, z: {}});
+  return `<svg class="pv" viewBox="-1230 -1230 2460 2460" aria-hidden="true"><path style="fill:var(--ink);opacity:.8" d="${shD(P(s.outline))}"/></svg>`;
+}
+function renderOrigins(){
+  $('#motifs').innerHTML = ORIGINS.map(o => {
+    const pv = (o.ray ? rayPreview(o.ray) : '') + o.m.map(motifPreview).join('');
+    return `<div class="card"><h3>${o.t}</h3>${pv ? `<div class="pvs">${pv}</div>` : ''}<p>${o.d}</p><p class="use">${o.u}</p><p class="src">${o.s}</p></div>`;
+  }).join('');
+}
+
+/* ================= викрійка ================= */
+function piece(star, part){
+  const k = PARTS[part].k, N = star.N;
+  if (k === 1) return {outline: star.outline, holes: star.holes, seam: null};
+  if (N % k || (star.alt && (N / k) % 2)) return null;
+  const i0 = star.valley[0], i1 = star.valley[N / k], seg = [];
+  for (let i = i0; ; i = (i + 1) % star.outline.length){ seg.push(star.outline[i]); if (i === i1 && seg.length > 1) break; }
+  const a0 = Math.atan2(seg[0][1], seg[0][0]), span = TAU / k;
+  const holes = star.holes.filter(h => { const [x, y] = shCenter(h); return ((Math.atan2(y, x) - a0) % TAU + TAU) % TAU < span; });
+  return {outline: seg.concat([[0, 0]]), holes, seam: [[0, 0], seg[seg.length - 1]]};
+}
+function tabPoly(seam, tw){
+  const [c, v] = seam, L = Math.hypot(v[0] - c[0], v[1] - c[1]), d = [(v[0] - c[0]) / L, (v[1] - c[1]) / L], n = [-d[1], d[0]];
+  const A = [c[0] + d[0] * tw * 1.4, c[1] + d[1] * tw * 1.4], B = [v[0] - d[0] * tw * 1.4, v[1] - d[1] * tw * 1.4];
+  return [A, [A[0] + n[0] * tw, A[1] + n[1] * tw], [B[0] + n[0] * tw, B[1] + n[1] * tw], B];
+}
+function layout(star, fixedSc){
+  const pc = piece(star, st.part); if (!pc) return null;
+  const [fw, fh] = FORMATS[st.fmt], m = 10, hdr = 16, withTab = !!(pc.seam && st.tab);
+  const box = (a, sc) => {
+    const pts = pc.outline.map(p => rot(p, a));
+    if (withTab && sc) tabPoly(pc.seam, 8 / sc).forEach(p => pts.push(rot(p, a)));
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), minx = Math.min(...xs), miny = Math.min(...ys);
+    return {minx, miny, bw: Math.max(...xs) - minx, bh: Math.max(...ys) - miny};
+  };
+  const fit = (W, H, b) => Math.min((W - 2 * m) / b.bw, (H - 2 * m - hdr) / b.bh);
+  let best = null;
+  for (const [W, H] of [[fw, fh], [fh, fw]])
+    for (let deg = 0; deg < 180; deg += 2){
+      const a = deg * Math.PI / 180, sc = fit(W, H, box(a, fixedSc || 0));
+      if (fixedSc){ if (sc >= fixedSc && (!best || sc > best.room)) best = {W, H, a, sc: fixedSc, room: sc}; }
+      else if (!best || sc > best.sc + 1e-9) best = {W, H, a, sc};
+    }
+  if (!best) return {tooBig: true};
+  if (withTab && !fixedSc) for (let i = 0; i < 4; i++) best.sc = fit(best.W, best.H, box(best.a, best.sc));
+  const {W, H, a, sc} = best, b = box(a, withTab ? sc : 0);
+  const ox = (W - b.bw * sc) / 2 - b.minx * sc, oy = m + hdr + (H - 2 * m - hdr - b.bh * sc) / 2 - b.miny * sc;
+  const T = p => { const q = rot(p, a); return [q[0] * sc + ox, q[1] * sc + oy]; };
+  return {pc, W, H, sc, T, D: 2 * R * sc, m, hdr};
+}
+function sheetSVG(L, forFile){
+  const {pc, W, H, sc, T, D, m} = L, c = {face: L.face}, v = {n: L.name};
+  const o = shD(P(pc.outline.map(T))), hs = pc.holes.map(h => shD(shMap(h, T, sc))).join('');
+  const strokeCut = forFile ? '0.3' : '0.45';
+  let g = '';
+  if (st.fill) g += `<path d="${o}${hs}" fill-rule="evenodd" fill="${c.face}"/>`;
+  g += `<path d="${o}" fill="none" stroke="#111" stroke-width="${strokeCut}"/><path d="${hs}" fill="none" stroke="#111" stroke-width="${strokeCut}"/>`;
+  if (pc.seam && st.tab){
+    const tp = tabPoly(pc.seam, 8 / sc).map(T);
+    g += `<polyline points="${tp.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ')}" fill="none" stroke="#111" stroke-width="${strokeCut}"/>`;
+    g += `<line x1="${f1(tp[0][0])}" y1="${f1(tp[0][1])}" x2="${f1(tp[3][0])}" y2="${f1(tp[3][1])}" stroke="#111" stroke-width="0.3" stroke-dasharray="2 1.5"/>`;
+  }
+  const cnt = PARTS[st.part].k, title = loc(`«${v.n}»${L.tag} · ${PARTS[st.part].n.toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${cnt} шт.`);
+  const txt = `<text x="${m}" y="${m + 5}" font-family="IBM Plex Sans, Arial, sans-serif" font-size="4.2" fill="#111">${title}</text>` +
+    `<text x="${m}" y="${m + 10.5}" font-family="IBM Plex Sans, Arial, sans-serif" font-size="3" fill="#555">${loc('Друк 100 %. Контроль 50 мм:')}</text>` +
+    `<line x1="${m + 42}" y1="${m + 9.5}" x2="${m + 92}" y2="${m + 9.5}" stroke="#111" stroke-width="0.4"/><line x1="${m + 42}" y1="${m + 8}" x2="${m + 42}" y2="${m + 11}" stroke="#111" stroke-width="0.3"/><line x1="${m + 92}" y1="${m + 8}" x2="${m + 92}" y2="${m + 11}" stroke="#111" stroke-width="0.3"/>`;
+  const bg = forFile ? '' : `<rect width="${W}" height="${H}" fill="#fff"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" ${forFile ? `width="${W}mm" height="${H}mm" ` : ''}viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">${bg}${g}${txt}</svg>`;
+}
+let LAY = null;
+let sheetKey = '', sheetStar = [];
+function renderSheet(){
+  const key = [st.fmt, st.part, st.tab, st.fill, st.player, st.layer.s, st.vid, st.layer.vid, cur().face, STAR2 ? L2C().face : ''].join('|');
+  if (key === sheetKey && STAR === sheetStar[0] && STAR2 === sheetStar[1]) return;
+  sheetKey = key; sheetStar = [STAR, STAR2];
+  $$('#fmt .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.fmt));
+  $$('#part .chip').forEach(b => { const ok = !!piece(STAR, b.dataset.k); b.disabled = !ok; b.title = ok ? '' : 'для цієї кількості променів частини будуть різні'; b.setAttribute('aria-pressed', b.dataset.k === st.part); });
+  if (!piece(STAR, st.part)) st.part = 'full';
+  $$('#part .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.part));
+  $('#tab').checked = st.tab; $('#fill').checked = st.fill; $('#tab').disabled = st.part === 'full';
+  $('#player-g').hidden = !STAR2;
+  if (!STAR2) st.player = 'back';
+  $$('#player .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.player));
+  const back = layout(STAR), front = st.player === 'front' && STAR2;
+  LAY = front ? layout(STAR2, back.sc * st.layer.s) : back;
+  const vid = front ? st.layer.vid : st.vid;
+  if (!LAY || LAY.tooBig){
+    const msg = !LAY ? 'Для другого шару ця частина недоступна: у нього інша кількість променів. Оберіть «Вся звізда».'
+                     : 'Другий шар у масштабі заднього не вміщується на аркуш. Оберіть більший формат або «Вся звізда».';
+    LAY = null;
+    $('#sheet-wrap').innerHTML = ''; $('#pstats').innerHTML = '';
+    $('#dl-pdf').disabled = $('#dl-svg').disabled = true;
+    $('#dl-note').textContent = msg;
+    return;
+  }
+  Object.assign(LAY, front ? {name: base(vid).n, face: L2C().face, tag: ' · другий шар', vid} : {name: base(vid).n, face: cur().face, tag: STAR2 ? ' · задній шар' : '', vid});
+  $('#sheet-wrap').innerHTML = sheetSVG(LAY, false);
+  $('#pstats').innerHTML = `<span>${st.fmt} ${LAY.W}×${LAY.H} мм</span><span>Ø звізди ${(LAY.D / 10).toFixed(1)} см</span><span>${PARTS[st.part].n.toLowerCase()} ×${PARTS[st.part].k}</span>`;
+  $('#dl-pdf').disabled = $('#dl-svg').disabled = false;
+  $('#dl-note').textContent = (STAR2 ? 'Обидва шари друкуються в одному масштабі: другий шар підходить до заднього.' : 'Викрійка готова до завантаження, разом зі змінами з конструктора.');
+}
+function textPNG(text, mmW, mmH, px = 12){
+  const cv = document.createElement('canvas'), k = 8; cv.width = Math.ceil(mmW * k); cv.height = Math.ceil(mmH * k);
+  const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height);
+  x.fillStyle = '#111'; x.font = `${px * k / 3}px "IBM Plex Sans", Arial, sans-serif`; x.textBaseline = 'middle'; x.fillText(loc(text), 0, cv.height / 2);
+  return cv.toDataURL('image/png');
+}
+function saveBlob(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+function download(kind){
+  if (!LAY) return;
+  const v = {n: LAY.name}, name = `vykrijka_${LAY.vid}_${st.fmt}_${st.part}` + (st.player === 'front' && STAR2 ? '_shar2' : '');
+  if (kind === 'svg'){ saveBlob(new Blob([sheetSVG(LAY, true)], {type: 'image/svg+xml'}), name + '.svg'); return; }
+  const {jsPDF} = window.jspdf || {}; if (!jsPDF){ $('#dl-note').textContent = 'PDF-бібліотека не завантажилася. Спробуйте SVG.'; return; }
+  const {pc, W, H, sc, T, D, m} = LAY, c = {face: LAY.face};
+  const doc = new jsPDF({unit: 'mm', format: [W, H], orientation: W > H ? 'landscape' : 'portrait'});
+  const poly = (pts, style) => { const d = []; for (let i = 1; i < pts.length; i++) d.push([pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]]); doc.lines(d, pts[0][0], pts[0][1], [1, 1], style, true); };
+  if (st.fill){
+    const hex = c.face.replace('#', ''); doc.setFillColor(parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16));
+    poly(pc.outline.map(T), 'F'); doc.setFillColor(255, 255, 255);
+    pc.holes.forEach(h => { if (h.t === 'c'){ const p = T(h.c); doc.circle(p[0], p[1], h.r * sc, 'F'); } else poly(h.pts.map(T), 'F'); });
+  }
+  doc.setDrawColor(17, 17, 17); doc.setLineWidth(0.3);
+  poly(pc.outline.map(T), 'S');
+  pc.holes.forEach(h => { if (h.t === 'c'){ const p = T(h.c); doc.circle(p[0], p[1], h.r * sc, 'S'); } else poly(h.pts.map(T), 'S'); });
+  if (pc.seam && st.tab){
+    const tp = tabPoly(pc.seam, 8 / sc).map(T);
+    for (let i = 0; i < 3; i++) doc.line(tp[i][0], tp[i][1], tp[i + 1][0], tp[i + 1][1]);
+    doc.setLineDashPattern([2, 1.5], 0); doc.line(tp[0][0], tp[0][1], tp[3][0], tp[3][1]); doc.setLineDashPattern([], 0);
+  }
+  const title = `«${v.n}»${LAY.tag} · ${PARTS[st.part].n.toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${PARTS[st.part].k} шт.`;
+  doc.addImage(textPNG(title, 160, 7, 14), 'PNG', m, m, 160, 7);
+  doc.addImage(textPNG('Друк 100 %. Контроль 50 мм:', 40, 4, 10), 'PNG', m, m + 7.5, 40, 4);
+  doc.setLineWidth(0.4); doc.line(m + 42, m + 9.5, m + 92, m + 9.5); doc.setLineWidth(0.3); doc.line(m + 42, m + 8, m + 42, m + 11); doc.line(m + 92, m + 8, m + 92, m + 11);
+  saveBlob(doc.output('blob'), name + '.pdf');
+}
+
+/* ================= обертання ================= */
+let last = performance.now(), SPIN = [], SPIN2 = [];
+const SEEN = new Set();
+function initSpin(){
+  SPIN = $$('.m-spin').map(g => ({g, svg: g.ownerSVGElement}));
+  SPIN2 = $$('.spin2').map(g => ({g, svg: g.ownerSVGElement}));
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? SEEN.add(e.target) : SEEN.delete(e.target)), {rootMargin: '120px'});
+  // головна сцена теж: її підвісні прикраси рухаються разом зі звіздою
+  new Set([...SPIN, ...SPIN2].map(o => o.svg).concat($$('.deco-hang').map(g => g.ownerSVGElement))).forEach(svg => io.observe(svg));
+}
+function tick(t){
+  const dt = Math.min((t - last) / 1000, 0.05); last = t;
+  if (!st.drag){ const target = st.auto ? 7 : 0; st.v += (target - st.v) * (1 - Math.pow(0.25, dt)); st.a += st.v * dt; }
+  $('#spin').setAttribute('transform', `rotate(${st.a.toFixed(2)})`);
+  if (STAR2){
+    const a2 = (st.layer.mode === 'counter' ? -1.5 * st.a : st.layer.mode === 'same' ? st.a : 0) + 180 / STAR2.N;
+    const tr2 = `rotate(${a2.toFixed(2)}) scale(${st.layer.s})`;
+    SPIN2.forEach(o => { if (SEEN.has(o.svg)) o.g.setAttribute('transform', tr2); });
+  }
+  if (HANG.length){
+    const rad = st.a * Math.PI / 180, sw = Math.max(-28, Math.min(28, -st.v * 0.5));
+    HANG.forEach(o => { if (!SEEN.has(o.svg)) return; const q = rot(STAR.anchors[o.i], rad); o.g.setAttribute('transform', `translate(${q[0].toFixed(1)} ${q[1].toFixed(1)}) rotate(${sw.toFixed(1)})`); });
+  }
+  const tr = `rotate(${st.a.toFixed(2)})`;
+  SPIN.forEach(o => { if (SEEN.has(o.svg)) o.g.setAttribute('transform', tr); });
+  requestAnimationFrame(tick);
+}
+function drag(){
+  const el = $('#stage');
+  const ang = e => { const r = el.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  el.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; st.drag = {a: ang(e), t: performance.now(), v: 0}; el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointermove', e => {
+    if (!st.drag) return; const a = ang(e), now = performance.now(); let da = a - st.drag.a; if (da > 180) da -= 360; if (da < -180) da += 360;
+    st.a += da; st.drag.v = st.drag.v * .6 + da / Math.max((now - st.drag.t) / 1000, .008) * .4; st.drag.a = a; st.drag.t = now; });
+  const end = () => { if (!st.drag) return; st.v = Math.max(-720, Math.min(720, st.drag.v)); st.drag = null; };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+}
+
+load(); buildUI(); renderNow(); initSpin(); drag();
+$$('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.l, true)));
+setLang(LANG);
+addEventListener('pagehide', saveNow); $('#b-auto').textContent = st.auto ? 'Пауза' : 'Крутити'; requestAnimationFrame(tick);
+</script>
