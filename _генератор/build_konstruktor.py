@@ -1,6 +1,6 @@
 """Збирає сторінку конструктора звізд: konstruktor/index.html зі сценами в стилі народного малярства,
 де звізда з конструктора показана в різних місцях."""
-import os, math, random, json
+import os, math, random, json, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PROJ = os.path.dirname(HERE)
@@ -233,10 +233,71 @@ tpl = open(os.path.join(HERE, "konstruktor.html"), encoding="utf-8").read()
 from i18n_en import EN   # англійська версія сторінки
 body = tpl.replace("%%SCENES%%", scenes).replace("%%I18N_EN%%", json.dumps(EN, ensure_ascii=False, indent=0))
 open(os.path.join(PROJ, "konstruktor.html"), "w", encoding="utf-8").write(body)
-page = ('<!doctype html>\n<html lang="uk">\n<head>\n<meta charset="utf-8">\n'
-        '<meta name="robots" content="noindex">\n'   # поки звізди погоджують, сторінки немає в пошуку
-        '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-        '<style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);'
-        'padding-bottom:env(safe-area-inset-bottom,0px)}</style>\n' + body + '\n</html>\n')
+def wrap(head, doc):
+    doc = doc.replace('<meta charset="utf-8">\n', "", 1)   # кодування має стояти на самому початку шапки
+    return ('<!doctype html>\n<html lang="uk">\n<head>\n<meta charset="utf-8">\n' + head +
+            '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            '<style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);'
+            'padding-bottom:env(safe-area-inset-bottom,0px)}</style>\n' + doc + '\n</html>\n')
+
+# копія для GitHub Pages: поки звізди погоджують, сторінки немає в пошуку
+page = wrap('<meta name="robots" content="noindex">\n', body)
 open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(page)
 print("konstruktor", len(page) // 1024, "KB")
+
+# копія для Netlify: відкрита для пошуку, з описом сторінки й даними про розробника
+SITE_URL = "https://constructorzvizd.netlify.app"   # без скісної риски в кінці
+AUTHOR, AUTHOR_LAT = "Вартан Маркар'ян", "Vartan Markarian"
+SEO_TITLE = "Конструктор звізд — різдвяні звізди за полтавськими мотивами"
+SEO_DESC = ("Онлайн-конструктор різдвяних звізд за мотивами полтавської різьби по дереву, майоліки, "
+            "вишивки й писанок. 18 основ, кольори, прикраси, викрійки A4, A3 і A2.")
+SEO_KEYS = ("конструктор звізд, різдвяна звізда, різдвяна зірка, викрійка звізди, викрійка зірки, "
+            "полтавська різьба по дереву, полтавська майоліка, полтавська вишивка, писанка, "
+            f"{AUTHOR}, {AUTHOR_LAT}, Christmas star builder, printable star template, Ukrainian folk star")
+person = {"@type": "Person", "name": AUTHOR, "alternateName": AUTHOR_LAT}
+ld = {"@context": "https://schema.org", "@type": "WebApplication",
+      "name": "Конструктор звізд", "alternateName": "Star Builder",
+      "description": ("Різдвяні звізди за мотивами полтавської різьби по дереву, майоліки й вікон будинку "
+                      "губернського земства, дерев'яних церков, вишивки й писанок. Основу можна змінити: кількість "
+                      "і форму променів, орнамент прорізів і кольори. Готову звізду можна роздрукувати викрійкою "
+                      "на аркуші A4, A3 або A2."),
+      "applicationCategory": "DesignApplication", "browserRequirements": "JavaScript",
+      "inLanguage": ["uk", "en"], "isAccessibleForFree": True,
+      "author": person, "creator": person, "copyrightHolder": person, "copyrightYear": 2026,
+      "featureList": ["18 основ звізд за полтавськими мотивами", "кількість і форма променів, зокрема форма «Сливки»",
+                      "орнамент прорізів і кольорові палітри", "другий шар і прикраси на кінчиках променів",
+                      "викрійки PDF і SVG на A4, A3 і A2: цілою, половинами чи чвертями",
+                      "українська й англійська версії"],
+      "about": ["Різдвяна звізда", "Полтавська різьба по дереву", "Будинок Полтавського губернського земства",
+                "Полтавська вишивка", "Писанка"]}
+if SITE_URL: ld["url"] = SITE_URL + "/"
+seo = (f'<meta name="description" content="{SEO_DESC}">\n'
+       f'<meta name="keywords" content="{SEO_KEYS}">\n'
+       f'<meta name="author" content="{AUTHOR} ({AUTHOR_LAT})">\n'
+       f'<meta property="og:type" content="website">\n<meta property="og:site_name" content="Конструктор звізд">\n'
+       f'<meta property="og:title" content="{SEO_TITLE}">\n<meta property="og:description" content="{SEO_DESC}">\n'
+       f'<meta property="og:locale" content="uk_UA">\n<meta property="og:locale:alternate" content="en_US">\n'
+       f'<meta property="og:image" content="{SITE_URL}/og-image.jpg">\n'   # netlify/og-image.jpg — знімок конструктора
+       f'<meta property="og:image:type" content="image/jpeg">\n'
+       f'<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+       f'<meta property="og:image:alt" content="Конструктор звізд: звізда «Розетка», галерея з 18 основ і налаштування променів">\n'
+       f'<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="{SITE_URL}/og-image.jpg">\n')
+if SITE_URL: seo += f'<link rel="canonical" href="{SITE_URL}/">\n<meta property="og:url" content="{SITE_URL}/">\n'
+seo += f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n'
+seo += '<script data-goatcounter="https://constructorzvizd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>\n'
+NETLIFY = os.path.join(PROJ, "netlify")
+os.makedirs(NETLIFY, exist_ok=True)
+doc = (body.replace("<title>Конструктор звізд</title>", f"<title>{SEO_TITLE}</title>", 1)
+           .replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "", 1)
+           .replace("SHARE_URL = ''", f"SHARE_URL = '{SITE_URL}/'", 1)   # посилання на звізду веде на сайт
+           .replace("const CNC_OFF = false", "const CNC_OFF = true", 1))
+doc = re.sub(r"[ \t]*<!--cnc-->.*?<!--/cnc-->\n?", "", doc, flags=re.S)   # розділу для ЧПК на сайті немає
+open(os.path.join(NETLIFY, "index.html"), "w", encoding="utf-8").write(wrap(seo, doc))
+robots = "User-agent: *\nAllow: /\n"
+if SITE_URL:
+    robots += f"Sitemap: {SITE_URL}/sitemap.xml\n"
+    open(os.path.join(NETLIFY, "sitemap.xml"), "w", encoding="utf-8").write(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f'<url><loc>{SITE_URL}/</loc></url>\n</urlset>\n')
+open(os.path.join(NETLIFY, "robots.txt"), "w", encoding="utf-8").write(robots)
+print("netlify", os.path.getsize(os.path.join(NETLIFY, "index.html")) // 1024, "KB")

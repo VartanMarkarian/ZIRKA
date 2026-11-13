@@ -106,7 +106,7 @@ body.no-scroll{overflow:hidden}
 .sw{display:flex;width:24px;height:24px;border-radius:50%;overflow:hidden;flex:none;border:1px solid color-mix(in srgb,var(--ink) 18%,transparent)}
 .sw i{flex:1}
 .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-select,input[type="color"]{font:inherit;font-size:.9rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+select,input[type="color"],input[type="number"],input[type="text"]{box-sizing:border-box;font:inherit;font-size:.9rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
 input[type="color"]{height:40px;padding:4px}
 .field{display:grid;gap:5px;min-width:0;font-size:.8rem;color:var(--muted)}
 input[type="range"]{width:100%;accent-color:var(--red);margin:0}
@@ -121,13 +121,32 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
 .reset{font:500 .78rem/1 var(--f-mono);padding:8px 12px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--muted);cursor:pointer;justify-self:start}
 /* викрійка */
 .pattern{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:start}
-.sheet-wrap{display:grid;place-items:center;background:var(--panel2);border-radius:var(--r-lg);padding:28px}
+.sheet-wrap.busy{opacity:.55;transition:opacity .2s}
+.sheet-wrap{min-width:0;display:grid;place-items:center;background:var(--panel2);border-radius:var(--r-lg);padding:28px}
 .sheet-wrap svg{max-width:100%;max-height:640px;height:auto;display:block;box-shadow:0 18px 40px -12px rgba(30,15,5,.45);border-radius:2px}
 .dl{display:flex;flex-wrap:wrap;gap:10px}
 .primary{font:600 .95rem/1 var(--f-body);padding:14px 22px;border-radius:999px;border:0;background:var(--red);color:var(--on-red);cursor:pointer;box-shadow:0 8px 20px -8px color-mix(in srgb,var(--red) 70%,transparent)}
 .secondary{font:600 .95rem/1 var(--f-body);padding:14px 22px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
 .primary:disabled,.secondary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .credits{border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:.86rem;text-align:center}
+.mine-list{display:flex;gap:10px;overflow-x:auto;padding:6px 4px 8px;scrollbar-width:thin}
+.ms{position:relative;flex:none}
+.ms .vt{width:82px;padding:9px 4px 8px;font-size:.72rem}
+.ms .vt svg{width:50px;height:50px}
+.ms-x{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:600 .95rem/1 var(--f-body);cursor:pointer;display:grid;place-items:center;padding:0}
+.ms-x:hover{color:var(--red);border-color:var(--red)}
+.sm{padding:11px 17px;font-size:.86rem}
+.share{display:grid;gap:8px}
+.share input{font-family:var(--f-mono);font-size:.78rem}
+.note .reset{margin-left:8px}
+.mode-tabs{width:fit-content;max-width:100%}
+.cnc-sheets{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:18px;width:100%;min-width:0;align-items:start}
+.cnc-sheet{display:grid;gap:8px;justify-items:center;margin:0;min-width:0}
+.cnc-sheet svg{width:100%;height:auto;max-height:520px;display:block;box-shadow:0 12px 26px -12px rgba(30,15,5,.45);border-radius:2px}
+.cnc-sheet figcaption{display:grid;gap:6px;justify-items:center;font:500 .74rem/1.3 var(--f-mono);color:var(--muted);text-align:center}
+.cnc-sheet figcaption button{font:500 .74rem/1 var(--f-mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.cnc-busy{font:500 .8rem/1.3 var(--f-mono);color:var(--muted)}
+.chip small{display:block;font:500 .68rem/1.2 var(--f-mono);color:var(--muted)}
 .note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--ochre);padding:6px 0 6px 12px;max-width:66ch}
 /* сцени */
 .scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
@@ -192,7 +211,7 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
 <div class="wrap">
   <header>
     <div class="topbar">
-      <div class="eyebrow">Конструктор зірок</div>
+      <div class="eyebrow">Конструктор звізд</div>
       <div class="toggles">
         <div class="theme" role="group" aria-label="Тема сторінки">
           <button type="button" data-t="light" aria-pressed="false">Світла</button>
@@ -211,7 +230,8 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
     <ol class="how">
       <li><span><b>Оберіть основу</b> з 18 звізд за мотивами полтавської різьби, майоліки й вишивки.</span></li>
       <li><span><b>Налаштуйте</b> промені, орнамент, кольори, другий шар і прикраси.</span></li>
-      <li><span><b>Роздрукуйте викрійку</b> на A4, A3 або A2 цілою, половинами чи чвертями.</span></li>
+      <li><span><b>Роздрукуйте викрійку</b> на A4, A3 або A2 цілою, половинами, чвертями чи по променю.</span></li>
+      <!--cnc--><li><span><b>Або розкрійте велику звізду</b> з фанери: файли DXF для ЧПК зі щільним розкладанням на листах.</span></li><!--/cnc-->
     </ol>
     <div class="band" aria-hidden="true"></div>
   </header>
@@ -236,6 +256,22 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
         <button class="tab" role="tab" type="button" data-k="colors">Кольори</button>
         <button class="tab" role="tab" type="button" data-k="layer">Другий шар</button>
         <button class="tab" role="tab" type="button" data-k="deco">Прикраси</button>
+        <button class="tab" role="tab" type="button" data-k="mine">Мої звізди</button>
+      </div>
+      <div class="group card" data-pane="mine">
+        <div class="label"><span>Мої звізди</span><output id="m-count"></output></div>
+        <div class="mine-list" id="m-list" hidden></div>
+        <p class="desc" id="m-hint"></p>
+        <div class="dl">
+          <button class="secondary sm" id="m-save" type="button">Зберегти як нову</button>
+          <button class="secondary sm" id="m-update" type="button" hidden>Оновити збережену</button>
+          <button class="secondary sm" id="m-share" type="button">Поділитися посиланням</button>
+        </div>
+        <div class="share" id="m-link-wrap" hidden>
+          <input type="text" id="m-link" readonly aria-label="Посилання на цю звізду">
+          <p class="desc">Посилання відкриває саме цю звізду: з її променями, орнаментом, кольорами, другим шаром і прикрасами. Адреса сторінки в браузері теж завжди веде на поточну звізду.</p>
+        </div>
+        <p class="note" id="m-note" hidden><span id="m-note-t"></span><button class="reset" id="m-undo" type="button">Повернути</button></p>
       </div>
       <div class="group" data-pane="base">
         <div class="label">Основа · <output id="v-count"></output></div>
@@ -336,10 +372,17 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
 
   <div class="band" aria-hidden="true"></div>
   <section class="sec" id="vykrijka">
+    <!--cnc-->
+    <div class="tabs mode-tabs" id="mode" role="tablist" aria-label="Вид викрійки">
+      <button class="tab" type="button" role="tab" data-m="paper">Викрійка на папері</button>
+      <button class="tab" type="button" role="tab" data-m="cnc">Велика звізда для ЧПК</button>
+    </div>
+    <!--/cnc-->
+    <div class="sec" data-mode="paper">
     <div class="sec-head">
       <div class="eyebrow">Викрійка</div>
       <h2>Друк на аркуші</h2>
-      <p>Звізда масштабується так, щоб вибрана частина вмістилася на аркуш з полем 10 мм. Половина й чверть дають більшу звізду: частини вирізають кілька разів і склеюють по клапану.</p>
+      <p>Звізда масштабується так, щоб вибрана частина вмістилася на аркуш з полем 10 мм. Половина, чверть і промінь дають більшу звізду: частини вирізають кілька разів і склеюють по клапану.</p>
     </div>
     <div class="pattern">
       <div class="sheet-wrap" id="sheet-wrap"></div>
@@ -367,6 +410,54 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
         <p class="note">Друк у масштабі 100 %, без «підігнати під сторінку». Контрольний відрізок 50 мм на аркуші допомагає перевірити масштаб.</p>
       </div>
     </div>
+    </div>
+
+    <!--cnc-->
+    <div class="sec" data-mode="cnc" hidden>
+      <div class="sec-head">
+        <div class="eyebrow">Велика звізда</div>
+        <h2>Розкрій фанери для ЧПК</h2>
+        <p>Та сама звізда з конструктора в справжньому розмірі. Її ділять на частини, а частини розкладаються на листи якомога щільніше: кожна деталь повертається й заходить променями між променями сусідньої, тож листів іде менше. Прорізи стають меншими там, де перемичка була б тоншою за задану.</p>
+      </div>
+      <div class="pattern">
+        <div class="sheet-wrap" id="cn-sheets"></div>
+        <div class="panel">
+          <div class="group" id="cn-player-g">
+            <div class="label">Шар</div>
+            <div class="chips" id="cn-player"></div>
+          </div>
+          <div class="group">
+            <div class="label"><span>Діаметр звізди, мм</span><output id="cn-d-out"></output></div>
+            <input type="range" id="cn-d" min="600" max="4000" step="10" aria-label="Діаметр звізди, мм">
+          </div>
+          <div class="group">
+            <div class="label">Лист фанери, мм</div>
+            <div class="chips" id="cn-sheet"></div>
+          </div>
+          <div class="group">
+            <div class="label">Розділити на частини</div>
+            <div class="chips" id="cn-part"></div>
+          </div>
+          <div class="row">
+            <label class="field" for="cn-th">Товщина фанери<select id="cn-th"><option value="6">6 мм</option><option value="8">8 мм</option><option value="10">10 мм</option><option value="12">12 мм</option><option value="15">15 мм</option><option value="18">18 мм</option></select></label>
+            <label class="field" for="cn-tool">Фреза<select id="cn-tool"><option value="3">Ø3 мм</option><option value="4">Ø4 мм</option><option value="6">Ø6 мм</option><option value="8">Ø8 мм</option><option value="10">Ø10 мм</option><option value="12">Ø12 мм</option></select></label>
+            <label class="field" for="cn-bridge">Перемичка від, мм<input type="number" id="cn-bridge" min="5" max="80" step="1"></label>
+          </div>
+          <div class="row">
+            <label class="field" for="cn-gap">Зазор між деталями, мм<input type="number" id="cn-gap" min="0" max="60" step="1"></label>
+            <label class="field" for="cn-edge">Поле від краю, мм<input type="number" id="cn-edge" min="0" max="60" step="1"></label>
+          </div>
+          <div class="stats" id="cn-stats"></div>
+          <p class="note" id="cn-note" hidden></p>
+          <div class="dl">
+            <button class="primary" id="cn-dxf" type="button">Завантажити DXF</button>
+            <button class="secondary" id="cn-svg" type="button">Завантажити SVG</button>
+          </div>
+          <p class="note">DXF і SVG у масштабі 1:1, одиниці — мм. Контур деталей лежить на шарі CONTOUR, прорізи — на шарі HOLES: спершу фрезерують прорізи, потім контур. У загальному файлі листи стоять поруч, а кожен лист окремо завантажується кнопкою під ним.</p>
+        </div>
+      </div>
+    </div>
+    <!--/cnc-->
   </section>
 
   <section class="sec">
@@ -387,7 +478,7 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
     <div class="motifs" id="motifs"></div>
   </section>
 
-  <footer class="credits">Розробка — Вартан Маркар'ян. © 2026</footer>
+  <footer class="credits">Розробка — Вартан Маркар'ян (Vartan Markarian). © 2026</footer>
 </div>
 
 <script>
@@ -463,10 +554,12 @@ const MOTIF = {
     return P(lo.concat(lo.slice(0, -1).reverse().map(([x, y]) => [x, -y]))); }},
   lobes3:  {n: 'Трилисник', cap: .5, g: (x0, x1, b) => lobes(x0, x1, b, 3)},
   lobes4:  {n: 'Чотирилисник', cap: .5, g: (x0, x1, b) => lobes(x0, x1, b, 4)},
-  rosette: {n: 'Розетка', cap: .5, g: (x0, x1, b) => {
+  rosette: {n: 'Розетка', cap: .5, g: (x0, x1, b, c) => {
     // шість пелюсток-мигдаликів сходяться вершинами в центрі, як різьблена розетка; між вершинами — тонка перемичка
-    const xc = (x0 + x1) / 2, rr = Math.min(b, (x1 - x0) / 2), out = [];
-    for (let i = 0; i < 6; i++){ const a = i * Math.PI / 3 + Math.PI / 6; out.push(shMap(lens(rr * .06, rr, rr * .13, 12), p => { const q = rot(p, a); return [q[0] + xc, q[1]]; })); }
+    // (для фанери вершини відсуваються від центру, щоб перемичка була не тоншою за задану)
+    const xc = (x0 + x1) / 2, rr = Math.min(b, (x1 - x0) / 2), r0 = Math.max(rr * .06, (c && c.hg) || 0), out = [];
+    if (r0 > rr * .6) return null;
+    for (let i = 0; i < 6; i++){ const a = i * Math.PI / 3 + Math.PI / 6; out.push(shMap(lens(r0, rr, rr * .13, 12), p => { const q = rot(p, a); return [q[0] + xc, q[1]]; })); }
     return out; }},
   whirl:   {n: 'Вихор (серп)', cap: .25, ctx: true, g: (x0, x1, b, c) => whirl(x0, x1, b, c.d0, c.d1)},
   arcring: {n: 'Дуга сяйва', cap: .5, ctx: true, g: (x0, x1, b, c) => {
@@ -519,7 +612,7 @@ const PROFILES = {
 /* ---------- зірка ---------- */
 function buildStar(spec){
   const N = spec.N, half = Math.PI / N, rin = spec.rin * R, alt = spec.alt ? spec.alt * R : 0;
-  const prof = PROFILES[spec.prof] || PROFILES.sharp, margin = 24, seam = 14, rclear = 0.2 * R, gap = 26, ajur = spec.ajur ?? 1;
+  const prof = PROFILES[spec.prof] || PROFILES.sharp, margin = spec.margin || 24, seam = spec.seam || 14, rclear = 0.2 * R, gap = Math.max(26, spec.hg || 0), ajur = spec.ajur ?? 1;
   const tip = k => (alt && k % 2 === 1) ? Math.max(alt, rin * 1.25) : R;
   const xv = rin * Math.cos(half), yv = rin * Math.sin(half);
   function lensProfile(Rk){
@@ -562,7 +655,7 @@ function buildStar(spec){
     while (x1 - x0 > 30 && !ok(x1)) x1 -= step;
     while (x1 - x0 > 30 && !ok(x0)) x0 += step;
     const m = MOTIF[kind]; if (!m || x1 - x0 < 30) return [];
-    const c = {half, seam, d0: 0.4 * Math.max(hf(x0, Rk, hp), 0), d1: 0.8 * Math.max(hf(x1, Rk, hp), 0)};
+    const c = {half, seam, hg: spec.hg || 0, d0: 0.4 * Math.max(hf(x0, Rk, hp), 0), d1: 0.8 * Math.max(hf(x1, Rk, hp), 0)};
     const gen = b => { const r = m.g(x0, x1, b, c); return r == null ? null : (Array.isArray(r) ? r : [r]); };
     let lo = 0, hi = m.cap * (x1 - x0), best = 0;
     for (let i = 0; i < 22; i++){ const mid = (lo + hi) / 2, s = gen(mid); if (s && fits(s, Rk, hp)){ best = mid; lo = mid; } else hi = mid; }
@@ -688,32 +781,219 @@ const VARIANTS = [
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FORMATS = {A4: [210, 297], A3: [297, 420], A2: [420, 594]};
-const PARTS = {full: {n: 'Вся звізда', k: 1}, half: {n: 'Половина', k: 2}, quarter: {n: 'Чверть', k: 4}};
-const st = {vid: 'rozetka', edits: {}, fmt: 'A4', part: 'full', tab: true, fill: false, player: 'back',
+const PARTS = {full: {n: 'Вся звізда', k: 1}, half: {n: 'Половина', k: 2}, quarter: {n: 'Чверть', k: 4}, ray: {n: 'Промінь', k: 0}};
+// «промінь» — по одному променю; за «через один» на папері пара довгий + короткий, щоб усі частини були однакові
+const partK = (star, part) => PARTS[part].k || (star.alt ? star.N / 2 : star.N);
+const partName = (star, part) => part === 'ray' && star.alt ? 'Пара променів' : PARTS[part].n;
+const st = {vid: 'rozetka', slot: null, edits: {}, fmt: 'A4', part: 'full', tab: true, fill: false, player: 'back', mode: 'paper',
+  cnc: {D: 2400, sheet: '1220x2440', part: 'quarter', th: 10, tool: 6, gap: 12, edge: 10, bridge: 25, player: 'back'},
             layer: {on: false, vid: 'myhdal', s: 0.55, mode: 'counter', link: true, pal: null, face: null, rim: null, edge: null, halo: 44, shadow: 2, geo: {}}, a: 0, v: 0, auto: !reduce, drag: null};
 const base = id => VARIANTS.find(v => v.id === id);
-function cur(){
-  const b = base(st.vid), e = st.edits[st.vid] || {}, p = PALS[b.pal];
+function cur(){ return cfg(st.vid, st.edits[st.vid] || {}); }
+function cfg(vid, e){   // основа зі змінами: готові налаштування звізди
+  const b = base(vid), p = PALS[b.pal];
   return {N: e.N ?? b.N, rin: e.rin ?? b.rin, prof: e.prof ?? b.prof, alt: e.alt ?? b.alt, ajur: e.ajur ?? 1,
           z: Object.assign({}, b.z, e.z || {}), face: e.face ?? b.col?.[0] ?? p.face, rim: e.rim ?? b.col?.[1] ?? p.rim, edge: e.edge ?? b.col?.[1] ?? p.edge, rimw: e.rimw ?? 24, pal: e.pal ?? b.pal,
           deco: e.deco ?? 'none', dcol: e.dcol ?? '#c9a24a', dsize: e.dsize ?? 1, devery: e.devery ?? 'all', dhole: e.dhole ?? true};
 }
 function edit(patch){ const e = st.edits[st.vid] || (st.edits[st.vid] = {}); Object.assign(e, patch); save(); render(); }
 let saveT = 0;
-function save(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 250); }
-function saveNow(){ try{ localStorage.setItem('k-zvizda-2', JSON.stringify({vid: st.vid, edits: st.edits, layer: st.layer, player: st.player, fmt: st.fmt, part: st.part, tab: st.tab, fill: st.fill})); }catch(e){} }
-function load(){ try{ const s = JSON.parse(localStorage.getItem('k-zvizda-2') || '{}', (k, v) => k === 'prof' && !PROFILES[v] ? 'lancet' : v);   /* прибрані форми пелюсток → «Сливки» */ if (s.vid && base(s.vid)) st.vid = s.vid; if (s.edits) st.edits = s.edits; if (s.layer && base(s.layer.vid)) Object.assign(st.layer, s.layer, {on: false, link: true, pal: null, face: null, rim: null, edge: null}); /* при відкритті шар вимкнений, кольори — під основну звізду */ if (s.player) st.player = s.player; ['fmt', 'part'].forEach(k => { if (s[k]) st[k] = s[k]; }); if (typeof s.tab === 'boolean') st.tab = s.tab; if (typeof s.fill === 'boolean') st.fill = s.fill; }catch(e){} }
+function save(){ clearTimeout(saveT); saveT = setTimeout(() => { saveNow(); syncHash(); }, 250); }
+function saveNow(){ try{ localStorage.setItem('k-zvizda-2', JSON.stringify({vid: st.vid, slot: st.slot, edits: st.edits, layer: st.layer, player: st.player, fmt: st.fmt, part: st.part, tab: st.tab, fill: st.fill, mode: st.mode, cnc: st.cnc})); }catch(e){} }
+function load(){ try{ const s = JSON.parse(localStorage.getItem('k-zvizda-2') || '{}', (k, v) => k === 'prof' && !PROFILES[v] ? 'lancet' : v);   /* прибрані форми пелюсток → «Сливки» */ if (s.vid && base(s.vid)) st.vid = s.vid; if (s.edits && typeof s.edits === 'object') Object.keys(s.edits).forEach(k => { const e = base(k) && cleanEdits(s.edits[k]); if (e) st.edits[k] = e; }); if (s.layer && base(s.layer.vid)) Object.assign(st.layer, cleanLayer(s.layer), {on: s.layer.on === true}); /* звізда відкривається такою, якою її лишили, разом із другим шаром */ if (typeof s.slot === 'string') st.slot = s.slot; if (s.player) st.player = s.player; ['fmt', 'part'].forEach(k => { if (s[k]) st[k] = s[k]; }); if (typeof s.tab === 'boolean') st.tab = s.tab; if (typeof s.fill === 'boolean') st.fill = s.fill; if (s.mode === 'cnc') st.mode = 'cnc'; if (s.cnc) Object.keys(st.cnc).forEach(k => { if (s.cnc[k] != null) st.cnc[k] = s.cnc[k]; }); if (!SHEETS[st.cnc.sheet]) st.cnc.sheet = '1220x2440'; }catch(e){} }
+
+/* ================= мої звізди й посилання на звізду =================
+   Звізда описується коротким записом: основа, зміни до неї, другий шар. Той самий запис лежить
+   у збережених звіздах і в адресі сторінки після #, тож посилання відкриває саме цю звізду.
+   Усе, що приходить із посилання чи зі сховища браузера, перевіряється за списками дозволених значень. */
+const MINE_MAX = 10, HEX = /^#[0-9a-f]{6}$/i, SHARE_URL = '';
+const LAYER0 = {vid: 'myhdal', s: 0.55, mode: 'counter', link: true, pal: null, face: null, rim: null, edge: null, halo: 44, shadow: 2, geo: {}};
+let MINE = [], mineMsg = null, mineKey = '', hashOwn = null;
+const sameStar = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function cleanEdits(e, geoOnly){
+  if (!e || typeof e !== 'object') return null;
+  const o = {}, num = (v, a, b) => typeof v === 'number' && isFinite(v) ? Math.min(b, Math.max(a, v)) : null;
+  let v;
+  if ([8, 10, 12, 14, 16, 18, 20, 24].includes(e.N)) o.N = e.N;
+  if ((v = num(e.rin, .38, .66)) != null) o.rin = v;
+  if (typeof e.prof === 'string' && Object.hasOwn(PROFILES, e.prof)) o.prof = e.prof;
+  if ((v = num(e.alt, 0, .95)) != null) o.alt = v && Math.max(.5, v);
+  if ((v = num(e.ajur, .4, 1)) != null) o.ajur = v;
+  if (e.z && typeof e.z === 'object'){
+    const z = {};
+    ['center', 'base', 'tip'].forEach(k => { if (e.z[k] === 'none' || (typeof e.z[k] === 'string' && Object.hasOwn(MOTIF, e.z[k]))) z[k] = e.z[k]; });
+    if (Object.keys(z).length) o.z = z;
+  }
+  if (geoOnly) return o;
+  if (typeof e.pal === 'string' && Object.hasOwn(PALS, e.pal)) o.pal = e.pal;
+  ['face', 'rim', 'edge', 'dcol'].forEach(k => { if (typeof e[k] === 'string' && HEX.test(e[k])) o[k] = e[k].toLowerCase(); });
+  if ((v = num(e.rimw, 0, 44)) != null) o.rimw = v;
+  if (typeof e.deco === 'string' && Object.hasOwn(DECOS, e.deco)) o.deco = e.deco;
+  if ((v = num(e.dsize, .6, 1.6)) != null) o.dsize = v;
+  if (e.devery === 'all' || e.devery === 'alt') o.devery = e.devery;
+  if (typeof e.dhole === 'boolean') o.dhole = e.dhole;
+  return o;
+}
+function cleanLayer(l){
+  const o = JSON.parse(JSON.stringify(LAYER0)); if (!l || typeof l !== 'object') return o;
+  if (typeof l.vid === 'string' && base(l.vid)) o.vid = l.vid;
+  if (typeof l.s === 'number' && isFinite(l.s)) o.s = Math.min(.85, Math.max(.3, l.s));
+  if (['counter', 'same', 'still'].includes(l.mode)) o.mode = l.mode;
+  if (typeof l.link === 'boolean') o.link = l.link;
+  if (typeof l.pal === 'string' && Object.hasOwn(PALS, l.pal)) o.pal = l.pal;
+  ['face', 'rim', 'edge'].forEach(k => { if (typeof l[k] === 'string' && HEX.test(l[k])) o[k] = l[k].toLowerCase(); });
+  if ([0, 22, 44, 70].includes(l.halo)) o.halo = l.halo;
+  if ([0, 1, 2].includes(l.shadow)) o.shadow = l.shadow;
+  o.geo = cleanEdits(l.geo, true) || {};
+  return o;
+}
+function cleanStar(o){   // запис звізди: {v: основа, e: зміни, l: другий шар (лише відмінне від типового), le: зміни основи другого шару}
+  if (!o || typeof o !== 'object' || typeof o.v !== 'string' || !base(o.v)) return null;
+  const r = {v: o.v}, e = cleanEdits(o.e);
+  if (e && Object.keys(e).length) r.e = e;
+  if (o.l && typeof o.l === 'object'){
+    const full = cleanLayer(o.l), le = cleanEdits(o.le);
+    r.l = {};
+    Object.keys(LAYER0).forEach(k => { if (!sameStar(full[k], LAYER0[k])) r.l[k] = full[k]; });
+    if (full.vid !== o.v && le && Object.keys(le).length) r.le = le;
+  }
+  return r;
+}
+function snap(){
+  const o = {v: st.vid, e: st.edits[st.vid]};
+  if (st.layer.on){ o.l = st.layer; o.le = st.edits[st.layer.vid]; }
+  return cleanStar(o);
+}
+function applyStar(o){
+  const copy = x => JSON.parse(JSON.stringify(x));
+  st.vid = o.v;
+  if (o.e) st.edits[o.v] = copy(o.e); else delete st.edits[o.v];
+  if (!o.l){ st.layer.on = false; return; }
+  const l = cleanLayer(o.l);
+  Object.assign(st.layer, l, {on: true});
+  if (l.vid !== o.v){ if (o.le) st.edits[l.vid] = copy(o.le); else delete st.edits[l.vid]; }
+}
+const encStar = o => btoa(JSON.stringify(o)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function decStar(s){ try{ return cleanStar(JSON.parse(atob(s.replace(/-/g, '+').replace(/_/g, '/')))); }catch(e){ return null; } }
+// адреса після #: «en» чи «uk» — мова, «z-…» — звізда; разом «en-z-…»
+function parseHash(){ const m = /^#(en|uk)?-?(?:z-([A-Za-z0-9_-]{1,4000}))?$/.exec(location.hash || ''); return m ? {lang: m[1], star: m[2]} : {}; }
+function starHash(){
+  const o = snap(), plain = o.v === 'rozetka' && !o.e && !o.l, en = LANG === 'en';
+  return (en ? 'en' : '') + (plain ? '' : (en ? '-' : '') + 'z-' + encStar(o));
+}
+function syncHash(){   // адреса сторінки завжди веде на поточну звізду
+  const h = starHash(); if ((location.hash || '').replace(/^#/, '') === h) return;
+  hashOwn = h;
+  try{ if (h) location.replace('#' + h); else history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+}
+const mineId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function saveMine(){ try{ localStorage.setItem('k-zvizdy', JSON.stringify(MINE)); }catch(e){} }
+function loadMine(){
+  try{
+    const a = JSON.parse(localStorage.getItem('k-zvizdy') || '[]');
+    if (Array.isArray(a)) MINE = a.map(m => ({id: m && typeof m.id === 'string' ? m.id.slice(0, 24).replace(/[^a-z0-9]/gi, '') : '', s: cleanStar(m && m.s)})).filter(m => m.id && m.s).slice(0, MINE_MAX);
+  }catch(e){}
+  if (!MINE.some(m => m.id === st.slot)) st.slot = null;
+}
+function openLinked(code){
+  const o = decStar(code); if (!o) return false;
+  const prev = snap(); if (sameStar(prev, o)) return false;
+  // свою незбережену звізду не губимо: вона переходить у «Мої звізди», якщо там є місце
+  let kept = false;
+  if ((prev.e || prev.l) && !MINE.some(m => sameStar(m.s, prev)) && MINE.length < MINE_MAX){ MINE.push({id: mineId(), s: prev}); saveMine(); kept = true; }
+  applyStar(o);
+  st.slot = (MINE.find(m => sameStar(m.s, o)) || {}).id || null;
+  mineMsg = {t: kept ? 'Відкрито звізду з посилання. Вашу попередню звізду збережено в «Мої звізди».' : 'Відкрито звізду з посилання. Збережіть її, щоб не загубити.'};
+  return true;
+}
+function renderMine(){
+  const now = snap(), act = MINE.find(m => m.id === st.slot), dirty = !!act && !sameStar(act.s, now);
+  const key = JSON.stringify(MINE);
+  if (key !== mineKey){
+    mineKey = key;
+    $('#m-list').innerHTML = MINE.map(m => {
+      const b = base(m.s.v), c = cfg(m.s.v, m.s.e || {}), s = starOf(c);
+      return `<div class="ms"><button type="button" class="vt" data-id="${m.id}" title="${b.n} · ${c.N} променів${m.s.l ? ' · два шари' : ''}">` +
+        `<svg viewBox="-1230 -1230 2460 2460" aria-hidden="true"><path fill-rule="evenodd" fill="${c.face}" stroke="${c.edge}" stroke-width="30" d="${starD(s)}"/></svg><span>${b.n}</span></button>` +
+        `<button type="button" class="ms-x" data-id="${m.id}" aria-label="Видалити «${b.n}»">×</button></div>`;
+    }).join('');
+    $('#m-list').hidden = !MINE.length;
+  }
+  $$('#m-list .vt').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === st.slot && !dirty));
+  const full = MINE.length >= MINE_MAX;
+  $('#m-count').textContent = `${MINE.length} з ${MINE_MAX}`;
+  $('#m-save').disabled = full; $('#m-update').hidden = !dirty;
+  $('#m-hint').hidden = !!MINE.length && !full;
+  $('#m-hint').textContent = full ? 'Збережено 10 звізд із 10. Видаліть одну, щоб зберегти нову.' : 'Збережіть звізду, і вона лишиться тут після перезавантаження сторінки. Вміщується до 10 звізд, вони зберігаються в цьому браузері.';
+  // повідомлення стосується звізди, якою вона була на той момент: після змін воно зникає
+  const cur0 = JSON.stringify(now);
+  if (mineMsg){ if (mineMsg.at == null) mineMsg.at = cur0; else if (mineMsg.at !== cur0) mineMsg = null; }
+  $('#m-note').hidden = !mineMsg; $('#m-note-t').textContent = mineMsg ? mineMsg.t : ''; $('#m-undo').hidden = !(mineMsg && mineMsg.undo);
+  if (!$('#m-link-wrap').hidden) $('#m-link').value = shareLink();
+}
+const shareLink = () => { const h = starHash(); return (SHARE_URL || location.origin + location.pathname) + (h ? '#' + h : ''); };
+async function shareStar(){
+  const url = shareLink();
+  $('#m-link-wrap').hidden = false; $('#m-link').value = url;
+  let ok = false;
+  try{ await navigator.clipboard.writeText(url); ok = true; }catch(e){}
+  if (!ok){ $('#m-link').focus(); $('#m-link').select(); }
+  mineMsg = {t: ok ? 'Посилання на цю звізду скопійовано.' : 'Скопіюйте посилання з поля.'};
+  renderMine(); track('share-star', 'Посилання на звізду');
+}
+function initMine(){
+  const done = () => { saveMine(); save(); render(); };
+  $('#m-save').addEventListener('click', () => {
+    const s = snap(), dup = MINE.find(m => sameStar(m.s, s));
+    if (dup){ st.slot = dup.id; mineMsg = {t: 'Така звізда вже є серед збережених.'}; return done(); }
+    if (MINE.length >= MINE_MAX) return;
+    const id = mineId(); MINE.push({id, s}); st.slot = id; mineMsg = {t: 'Звізду збережено.'};
+    done(); track('save-star', 'Збереження звізди');
+  });
+  $('#m-update').addEventListener('click', () => {
+    const act = MINE.find(m => m.id === st.slot); if (!act) return;
+    act.s = snap(); mineMsg = {t: 'Збережену звізду оновлено.'}; done();
+  });
+  $('#m-list').addEventListener('click', e => {
+    const x = e.target.closest('.ms-x'), b = e.target.closest('.vt');
+    if (x){
+      const i = MINE.findIndex(m => m.id === x.dataset.id); if (i < 0) return;
+      const [item] = MINE.splice(i, 1), wasOn = st.slot === item.id;
+      if (wasOn) st.slot = null;
+      mineMsg = {t: 'Звізду видалено.', undo: () => { if (MINE.length < MINE_MAX){ MINE.splice(i, 0, item); if (wasOn) st.slot = item.id; } }};
+      return done();
+    }
+    if (!b) return;
+    const m = MINE.find(m => m.id === b.dataset.id); if (!m) return;
+    const prev = snap(), prevSlot = st.slot, unsaved = !sameStar(prev, m.s) && !MINE.some(q => sameStar(q.s, prev));
+    applyStar(m.s); st.slot = m.id;
+    mineMsg = unsaved ? {t: 'Попередня звізда не була збережена.', undo: () => { applyStar(prev); st.slot = prevSlot; }} : null;
+    done();
+  });
+  $('#m-undo').addEventListener('click', () => { const u = mineMsg && mineMsg.undo; mineMsg = null; if (u) u(); done(); });
+  $('#m-share').addEventListener('click', shareStar);
+  $('#m-link').addEventListener('focus', e => e.target.select());
+  addEventListener('hashchange', () => {   // у ту саму вкладку вставили інше посилання на звізду
+    if ((location.hash || '').replace(/^#/, '') === hashOwn) return;
+    const h = parseHash();
+    if (h.lang && h.lang !== LANG) setLang(h.lang);
+    if (h.star && openLinked(h.star)){ save(); render(); }
+  });
+}
 
 /* ================= мова сторінки =================
    Сторінка пишеться українською; англійська накладається поверх: точні відповідники з EN,
    складені рядки з числами — за шаблонами EN_RX. Спостерігач перекладає все, що з'являється
    на сторінці після перемальовування, а при поверненні на українську відновлюються оригінали. */
 let LANG = 'uk';
-try{ LANG = location.hash === '#en' ? 'en' : location.hash === '#uk' ? 'uk' : localStorage.getItem('k-lang') === 'en' ? 'en' : 'uk'; }catch(e){}
+try{ LANG = parseHash().lang || (localStorage.getItem('k-lang') === 'en' ? 'en' : 'uk'); }catch(e){}
 const EN = %%I18N_EN%%;
 const CYR = /[А-Яа-яІіЇїЄєҐґ]/;
 const lc1 = t => t.charAt(0).toLowerCase() + t.slice(1);
 const EN_RX = [
+  [/^(\d+) з (\d+)$/, '$1 of $2'],
+  [/^Видалити «(.+)»$/, (m, a) => `Delete “${loc(a)}”`],
+  [/^(Ø?[\d.,]+) мм$/, '$1 mm'],
   [/^(\d+) варіантів$/, '$1 variants'],
   [/^(\d+) променів$/, '$1 rays'],
   [/^(\d+) прорізів$/, '$1 cutouts'],
@@ -774,13 +1054,21 @@ const i18nObs = new MutationObserver(ms => {
     else m.addedNodes.forEach(n => walk(n, locText, locAttrs));
   });
 });
+/* події для GoatCounter: без лічильника на сторінці нічого не роблять */
+function track(path, title){
+  const send = () => window.goatcounter?.count?.({path, title, event: true});
+  window.goatcounter?.count ? send() : addEventListener('load', send, {once: true});
+}
+let enTracked = false;
 function setLang(l, user){
   LANG = l;
+  if (l === 'en' && !enTracked){ enTracked = true; track('lang-en', 'Сторінка англійською'); }
   if (user) try{ localStorage.setItem('k-lang', l); }catch(e){}
   document.documentElement.lang = l === 'en' ? 'en' : 'uk';
-  document.title = l === 'en' ? 'Star Builder' : 'Конструктор звізд';
+  document.title = l === 'en' ? 'Star Builder: Christmas stars with Poltava motifs' : 'Конструктор звізд — різдвяні звізди за полтавськими мотивами';
   $('h1').innerHTML = l === 'en' ? 'Star <em>Builder</em>' : 'Конструктор <em>звізд</em>';
   sheetKey = ''; renderSheet();   // підписи на викрійці будуються вже потрібною мовою
+  cncDraw();
   if (l === 'en') walk(document.body, locText, locAttrs);
   else walk(document.body, n => { const r = ORIG.get(n); if (r && n.data === r.en) n.data = r.uk; },
                           el => { const r = ORIG.get(el); if (r) Object.entries(r).forEach(([a, v]) => { if (el.getAttribute(a) === v.en) el.setAttribute(a, v.uk); }); });
@@ -954,6 +1242,8 @@ function renderNow(){
   $('#cap-name').textContent = v.n + ' · ' + c.N + ' променів';
   $('#stats').innerHTML = `<span>${c.N} променів</span><span>${STAR.holes.length} прорізів</span><span>прорізи ${Math.round(STAR.openPct)} %</span>`;
   renderSheet();
+  cncSchedule();
+  renderMine();
 }
 
 /* ================= прикраси на кінчиках ================= */
@@ -1132,11 +1422,12 @@ function renderOrigins(){
 }
 
 /* ================= викрійка ================= */
-function piece(star, part){
-  const k = PARTS[part].k, N = star.N;
+function piece(star, part, i = 0, same = true){
+  // i-та частина з k; same — частини мають бути однакові (на папері друкують одну й ріжуть кілька разів)
+  const k = typeof part === 'number' ? part : partK(star, part), N = star.N;
   if (k === 1) return {outline: star.outline, holes: star.holes, seam: null};
-  if (N % k || (star.alt && (N / k) % 2)) return null;
-  const i0 = star.valley[0], i1 = star.valley[N / k], seg = [];
+  if (N % k || (same && star.alt && (N / k) % 2)) return null;
+  const i0 = star.valley[i * N / k], i1 = star.valley[(i + 1) * N / k % N], seg = [];
   for (let i = i0; ; i = (i + 1) % star.outline.length){ seg.push(star.outline[i]); if (i === i1 && seg.length > 1) break; }
   const a0 = Math.atan2(seg[0][1], seg[0][0]), span = TAU / k;
   const holes = star.holes.filter(h => { const [x, y] = shCenter(h); return ((Math.atan2(y, x) - a0) % TAU + TAU) % TAU < span; });
@@ -1169,7 +1460,7 @@ function layout(star, fixedSc){
   const {W, H, a, sc} = best, b = box(a, withTab ? sc : 0);
   const ox = (W - b.bw * sc) / 2 - b.minx * sc, oy = m + hdr + (H - 2 * m - hdr - b.bh * sc) / 2 - b.miny * sc;
   const T = p => { const q = rot(p, a); return [q[0] * sc + ox, q[1] * sc + oy]; };
-  return {pc, W, H, sc, T, D: 2 * R * sc, m, hdr};
+  return {pc, W, H, sc, T, D: 2 * R * sc, m, hdr, star};
 }
 function sheetSVG(L, forFile){
   const {pc, W, H, sc, T, D, m} = L, c = {face: L.face}, v = {n: L.name};
@@ -1183,7 +1474,7 @@ function sheetSVG(L, forFile){
     g += `<polyline points="${tp.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ')}" fill="none" stroke="#111" stroke-width="${strokeCut}"/>`;
     g += `<line x1="${f1(tp[0][0])}" y1="${f1(tp[0][1])}" x2="${f1(tp[3][0])}" y2="${f1(tp[3][1])}" stroke="#111" stroke-width="0.3" stroke-dasharray="2 1.5"/>`;
   }
-  const cnt = PARTS[st.part].k, title = loc(`«${v.n}»${L.tag} · ${PARTS[st.part].n.toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${cnt} шт.`);
+  const cnt = partK(L.star, st.part), title = loc(`«${v.n}»${L.tag} · ${partName(L.star, st.part).toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${cnt} шт.`);
   const txt = `<text x="${m}" y="${m + 5}" font-family="IBM Plex Sans, Arial, sans-serif" font-size="4.2" fill="#111">${title}</text>` +
     `<text x="${m}" y="${m + 10.5}" font-family="IBM Plex Sans, Arial, sans-serif" font-size="3" fill="#555">${loc('Друк 100 %. Контроль 50 мм:')}</text>` +
     `<line x1="${m + 42}" y1="${m + 9.5}" x2="${m + 92}" y2="${m + 9.5}" stroke="#111" stroke-width="0.4"/><line x1="${m + 42}" y1="${m + 8}" x2="${m + 42}" y2="${m + 11}" stroke="#111" stroke-width="0.3"/><line x1="${m + 92}" y1="${m + 8}" x2="${m + 92}" y2="${m + 11}" stroke="#111" stroke-width="0.3"/>`;
@@ -1199,6 +1490,7 @@ function renderSheet(){
   $$('#fmt .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.fmt));
   $$('#part .chip').forEach(b => { const ok = !!piece(STAR, b.dataset.k); b.disabled = !ok; b.title = ok ? '' : 'для цієї кількості променів частини будуть різні'; b.setAttribute('aria-pressed', b.dataset.k === st.part); });
   if (!piece(STAR, st.part)) st.part = 'full';
+  $('#part .chip[data-k="ray"]').textContent = partName(STAR, 'ray');
   $$('#part .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.part));
   $('#tab').checked = st.tab; $('#fill').checked = st.fill; $('#tab').disabled = st.part === 'full';
   $('#player-g').hidden = !STAR2;
@@ -1218,7 +1510,7 @@ function renderSheet(){
   }
   Object.assign(LAY, front ? {name: base(vid).n, face: L2C().face, tag: ' · другий шар', vid} : {name: base(vid).n, face: cur().face, tag: STAR2 ? ' · задній шар' : '', vid});
   $('#sheet-wrap').innerHTML = sheetSVG(LAY, false);
-  $('#pstats').innerHTML = `<span>${st.fmt} ${LAY.W}×${LAY.H} мм</span><span>Ø звізди ${(LAY.D / 10).toFixed(1)} см</span><span>${PARTS[st.part].n.toLowerCase()} ×${PARTS[st.part].k}</span>`;
+  $('#pstats').innerHTML = `<span>${st.fmt} ${LAY.W}×${LAY.H} мм</span><span>Ø звізди ${(LAY.D / 10).toFixed(1)} см</span><span>${partName(LAY.star, st.part).toLowerCase()} ×${partK(LAY.star, st.part)}</span>`;
   $('#dl-pdf').disabled = $('#dl-svg').disabled = false;
   $('#dl-note').textContent = (STAR2 ? 'Обидва шари друкуються в одному масштабі: другий шар підходить до заднього.' : 'Викрійка готова до завантаження, разом зі змінами з конструктора.');
 }
@@ -1235,7 +1527,7 @@ function saveBlob(blob, name){
 function download(kind){
   if (!LAY) return;
   const v = {n: LAY.name}, name = `vykrijka_${LAY.vid}_${st.fmt}_${st.part}` + (st.player === 'front' && STAR2 ? '_shar2' : '');
-  if (kind === 'svg'){ saveBlob(new Blob([sheetSVG(LAY, true)], {type: 'image/svg+xml'}), name + '.svg'); return; }
+  if (kind === 'svg'){ saveBlob(new Blob([sheetSVG(LAY, true)], {type: 'image/svg+xml'}), name + '.svg'); track('download-svg', 'Завантаження викрійки SVG'); return; }
   const {jsPDF} = window.jspdf || {}; if (!jsPDF){ $('#dl-note').textContent = 'PDF-бібліотека не завантажилася. Спробуйте SVG.'; return; }
   const {pc, W, H, sc, T, D, m} = LAY, c = {face: LAY.face};
   const doc = new jsPDF({unit: 'mm', format: [W, H], orientation: W > H ? 'landscape' : 'portrait'});
@@ -1253,11 +1545,360 @@ function download(kind){
     for (let i = 0; i < 3; i++) doc.line(tp[i][0], tp[i][1], tp[i + 1][0], tp[i + 1][1]);
     doc.setLineDashPattern([2, 1.5], 0); doc.line(tp[0][0], tp[0][1], tp[3][0], tp[3][1]); doc.setLineDashPattern([], 0);
   }
-  const title = `«${v.n}»${LAY.tag} · ${PARTS[st.part].n.toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${PARTS[st.part].k} шт.`;
+  const title = `«${v.n}»${LAY.tag} · ${partName(LAY.star, st.part).toLowerCase()} · Ø ${(D / 10).toFixed(1)} см · вирізати ${partK(LAY.star, st.part)} шт.`;
   doc.addImage(textPNG(title, 160, 7, 14), 'PNG', m, m, 160, 7);
   doc.addImage(textPNG('Друк 100 %. Контроль 50 мм:', 40, 4, 10), 'PNG', m, m + 7.5, 40, 4);
   doc.setLineWidth(0.4); doc.line(m + 42, m + 9.5, m + 92, m + 9.5); doc.setLineWidth(0.3); doc.line(m + 42, m + 8, m + 42, m + 11); doc.line(m + 92, m + 8, m + 92, m + 11);
   saveBlob(doc.output('blob'), name + '.pdf');
+  track('download-pdf', 'Завантаження викрійки PDF');
+}
+
+/* ================= велика звізда: розкрій фанери для ЧПК ================= */
+const SHEETS = {'1220x2440': [1220, 2440], '1250x2500': [1250, 2500], '1525x1525': [1525, 1525], '1500x3000': [1500, 3000]};
+const CPARTS = {full: ['Ціла', 'Whole'], half: ['Половини', 'Halves'], quarter: ['Чверті', 'Quarters'], ray: ['Промені', 'Rays']};
+const tr = (uk, en) => LANG === 'en' ? en : uk;
+const plural = (n, a, b, c) => { const d = n % 10, h = n % 100; return d === 1 && h !== 11 ? a : d >= 2 && d <= 4 && (h < 12 || h > 14) ? b : c; };
+const sheetsTxt = n => tr(`${n} ${plural(n, 'лист', 'листи', 'листів')}`, `${n} ${n === 1 ? 'sheet' : 'sheets'}`);
+
+function cncJob(job){
+  // Щільна розкладка деталей на листах. Деталь «падає» на лист згори, як у тетрісі: для кожної колонки
+  // шириною 3 мм відомі її верхній і нижній край, тож промінь однієї деталі заходить між променями іншої.
+  // Перебираються кути повороту й положення; береться найнижче й найщільніше місце.
+  const W = job.W, H = job.H, edge = job.edge, gap = job.gap, COL = 3;
+  const NC = Math.floor((W - 2 * edge) / COL), KK = Math.ceil(gap / COL);
+  function dense(pts, step){
+    const o = [];
+    for (let i = 0; i < pts.length; i++){
+      const a = pts[i], b = pts[(i + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < n; j++) o.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+    }
+    return o;
+  }
+  const circ = h => { const n = Math.max(16, Math.ceil(2 * Math.PI * h.r / 3)), o = []; for (let i = 0; i < n; i++){ const a = i * 2 * Math.PI / n; o.push([h.c[0] + h.r * Math.cos(a), h.c[1] + h.r * Math.sin(a)]); } return o; };
+  const area = pts => { let s = 0; for (let i = 0; i < pts.length; i++){ const a = pts[i], b = pts[(i + 1) % pts.length]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
+  const TY = job.types.map(t => ({d: dense(t.pts, COL / 2), area: area(t.pts)}));
+  const turn = (d, a) => { const c = Math.cos(a), s = Math.sin(a); return d.map(([x, y]) => [x * c - y * s, x * s + y * c]); };
+  // блок — одна деталь або пара: друга повернута на 180° і всунута променями між променями першої
+  const single = ti => ({m: [{t: ti, a: 0, bx: 0, by: 0}], d: TY[ti].d, area: TY[ti].area, memo: new Map()});
+  function pair(ti){
+    let best = null;
+    for (let deg = 0; deg < 180; deg += 3){
+      const a = deg * Math.PI / 180, A = turn(TY[ti].d, a), B = A.map(([x, y]) => [-x, -y]);
+      const cols = pts => { let c0 = Infinity, c1 = -Infinity; pts.forEach(([x]) => { const c = Math.floor(x / COL); if (c < c0) c0 = c; if (c > c1) c1 = c; }); return [c0, c1]; };
+      const [a0, a1] = cols(A), [b0, b1] = cols(B), bot = new Float64Array(a1 - a0 + 1 + 2 * KK).fill(-Infinity), top = new Float64Array(b1 - b0 + 1).fill(Infinity);
+      A.forEach(([x, y]) => { const c = Math.floor(x / COL) - a0; for (let j = c; j <= c + 2 * KK; j++) if (y > bot[j]) bot[j] = y; });   // низ першої, розширений на зазор
+      B.forEach(([x, y]) => { const c = Math.floor(x / COL) - b0; if (y < top[c]) top[c] = y; });
+      let ay0 = Infinity, ay1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+      A.forEach(([, y]) => { if (y < ay0) ay0 = y; if (y > ay1) ay1 = y; }); B.forEach(([, y]) => { if (y < by0) by0 = y; if (y > by1) by1 = y; });
+      for (let sh = a0 - b1; sh <= a1 - b0; sh += 2){   // зсув другої деталі в колонках
+        let dy = -Infinity;
+        for (let c = 0; c < top.length; c++){ const j = c + b0 + sh - a0 + KK; if (j >= 0 && j < bot.length && bot[j] > -Infinity){ const v = bot[j] - top[c]; if (v > dy) dy = v; } }
+        if (dy === -Infinity) continue;
+        dy += gap;
+        const w = Math.max(a1, b1 + sh) - Math.min(a0, b0 + sh) + 1, h = Math.max(ay1, by1 + dy) - Math.min(ay0, by0 + dy), wm = w * COL;
+        if (Math.min(wm, h) > W - 2 * edge || Math.max(wm, h) > H - 2 * edge) continue;
+        const s = wm * h;
+        if (!best || s < best.s) best = {s, a, bx: sh * COL, by: dy, A, B};
+      }
+    }
+    if (!best) return null;
+    return {m: [{t: ti, a: best.a, bx: 0, by: 0}, {t: ti, a: best.a + Math.PI, bx: best.bx, by: best.by}],
+            d: best.A.concat(best.B.map(([x, y]) => [x + best.bx, y + best.by])), area: 2 * TY[ti].area, memo: new Map()};
+  }
+
+  function prof(bl, deg){   // профіль блока, повернутого на deg градусів: верх і низ у кожній колонці
+    deg = ((deg % 360) + 360) % 360;
+    if (bl.memo.has(deg)) return bl.memo.get(deg);
+    const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), d = bl.d, q = new Float64Array(d.length * 2);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (let i = 0; i < d.length; i++){
+      const x = d[i][0] * c - d[i][1] * s, y = d[i][0] * s + d[i][1] * c;
+      q[2 * i] = x; q[2 * i + 1] = y;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+    const n = Math.max(1, Math.ceil((x1 - x0) / COL - 1e-9)), h = y1 - y0;
+    let r = null;
+    if (n <= NC && h <= H - 2 * edge){
+      const top = new Float64Array(n).fill(Infinity), bot = new Float64Array(n).fill(-Infinity), tg = new Float64Array(n + 2 * KK).fill(Infinity);
+      for (let i = 0; i < d.length; i++){
+        const ci = Math.min(n - 1, Math.floor((q[2 * i] - x0) / COL)), y = q[2 * i + 1] - y0;
+        if (y < top[ci]) top[ci] = y; if (y > bot[ci]) bot[ci] = y;
+      }
+      // верх, розширений на зазор: сусідні колонки ближче за зазор теж мають бути вільні
+      for (let ci = 0; ci < n; ci++) for (let j = ci; j <= ci + 2 * KK; j++) if (top[ci] - gap < tg[j]) tg[j] = top[ci] - gap;
+      r = {deg, a, n, h, top, bot, tg, tx: -x0, ty: -y0};
+    }
+    bl.memo.set(deg, r); return r;
+  }
+  function drop(sky, p, ox){
+    let dy = -Infinity;
+    for (let j = 0; j < p.n + 2 * KK; j++){ const sc = ox - KK + j; if (sc >= 0 && sc < NC){ const v = sky[sc] - p.tg[j]; if (v > dy) dy = v; } }
+    return dy;
+  }
+  function best(sky, bl, lam){
+    let b = null;
+    const at = (deg, ox) => {
+      const p = prof(bl, deg); if (!p || ox < 0 || ox + p.n > NC) return;
+      const dy = drop(sky, p, ox); if (dy + p.h > H - edge + 1e-6) return;
+      // lam ≥ 0: найнижче місце з найменшою порожнечею над деталлю; lam < 0: найменший приріст зайнятої площі
+      let w = 0, g = 0;
+      for (let ci = 0; ci < p.n; ci++){ w += p.top[ci] + dy - sky[ox + ci]; g += p.bot[ci] + dy - sky[ox + ci]; }
+      const s = lam >= 0 ? dy + p.h + lam * w / p.n : g * COL / 1000 + 0.05 * (dy + p.h);
+      if (!b || s < b.s - 1e-9) b = {s, p, ox, dy};
+    };
+    for (let deg = 0; deg < 360; deg += 5){
+      const p = prof(bl, deg); if (!p) continue;
+      for (let ox = 0; ox + p.n <= NC; ox += 3) at(deg, ox);
+      at(deg, NC - p.n);
+    }
+    if (b){ const d0 = b.p.deg, o0 = b.ox; for (let dd = -4; dd <= 4; dd++) for (let o = -2; o <= 2; o++) at(d0 + dd, o0 + o); }
+    return b;
+  }
+  function pack(order, lam){
+    const sheets = [];
+    for (const bl of order){
+      let sh = null;
+      for (const x of sheets){   // спершу дозаповнюємо вже початі листи
+        if (x.full.has(bl.key)) continue;
+        x.b = best(x.sky, bl, lam);
+        if (x.b){ sh = x; break; }
+        x.full.add(bl.key);   // далі лист лише заповнюється, тож такий блок туди вже не стане
+      }
+      if (!sh){
+        sh = {sky: new Float64Array(NC).fill(edge - gap), items: [], used: 0, full: new Set()};
+        sh.b = best(sh.sky, bl, lam); if (!sh.b) return null;
+        sheets.push(sh);
+      }
+      const b = sh.b, p = b.p, tx = edge + b.ox * COL + p.tx, ty = b.dy + p.ty, c = Math.cos(p.a), s = Math.sin(p.a);
+      for (let ci = 0; ci < p.n; ci++){ const v = p.bot[ci] + b.dy; if (v > sh.sky[b.ox + ci]) sh.sky[b.ox + ci] = v; }
+      bl.m.forEach(m => sh.items.push({t: m.t, a: m.a + p.a, x: tx + m.bx * c - m.by * s, y: ty + m.bx * s + m.by * c}));
+      sh.used = Math.max(sh.used, Math.ceil(b.dy + p.h + edge));
+    }
+    return sheets;
+  }
+  // набори блоків: усі деталі поодинці або парами (непарна лишається одна); більші — першими
+  const singles = job.types.map((t, ti) => Object.assign(single(ti), {key: 's' + ti}));
+  const pairs = job.types.map((t, ti) => t.count > 1 ? pair(ti) : null).map((p, ti) => p && Object.assign(p, {key: 'p' + ti}));
+  const sets = [[], []];
+  job.types.forEach((t, ti) => {
+    for (let i = 0; i < t.count; i++) sets[0].push(singles[ti]);
+    if (pairs[ti]){ for (let i = 0; i < Math.floor(t.count / 2); i++) sets[1].push(pairs[ti]); if (t.count % 2) sets[1].push(singles[ti]); }
+  });
+  const orders = (pairs.some(Boolean) ? sets : [sets[0]]).flatMap(o => {
+    const big = o.slice().sort((a, b) => b.area - a.area), mixed = [];
+    if (job.types.length > 1){   // довгі й короткі промені впереміш
+      const by = job.types.map((t, ti) => big.filter(x => x.m[0].t === ti));
+      for (let i = 0; mixed.length < big.length; i++) by.forEach(l => { if (l[i]) mixed.push(l[i]); });
+      return [big, mixed];
+    }
+    return [big];
+  });
+  let res = null;
+  for (const order of orders)
+    for (const lam of [0.3, 1.5, -1]){
+      const r = pack(order, lam); if (!r) continue;
+      const k = [r.length, r[r.length - 1].used, r.reduce((s, x) => s + x.used, 0)];
+      if (!res || k[0] < res.k[0] || (k[0] === res.k[0] && (k[1] < res.k[1] || (k[1] === res.k[1] && k[2] < res.k[2])))) res = {k, r};
+    }
+
+  // найвужча перемичка: найменша відстань між різними контурами деталі (прорізи, край, шов)
+  let bridge = Infinity;
+  const rin = [];
+  job.types.forEach(t => {
+    const shapes = [t.pts].concat(t.holes.map(h => h.r ? circ(h) : h.pts)), cell = 50, grid = new Map();
+    shapes.forEach((sh, si) => dense(sh, 3).forEach(([x, y]) => {
+      const cx = Math.floor(x / cell) + 2000, cy = Math.floor(y / cell) + 2000;
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++){
+        const g = grid.get((cx + dx) * 8192 + cy + dy); if (!g) continue;
+        for (let i = 0; i < g.length; i += 3) if (g[i + 2] !== si){ const d = Math.hypot(g[i] - x, g[i + 1] - y); if (d < bridge) bridge = d; }
+      }
+      const key = cx * 8192 + cy; let g = grid.get(key); if (!g) grid.set(key, g = []); g.push(x, y, si);
+    }));
+    // найбільше коло, що вміщується в проріз: чи пройде фреза
+    rin.push(t.holes.map(h => {
+      if (h.r) return h.r;
+      const p = h.pts; let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, r = 0;
+      p.forEach(([x, y]) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; });
+      for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++){
+        const x = x0 + (x1 - x0) * (i + 0.5) / 16, y = y0 + (y1 - y0) * (j + 0.5) / 16;
+        let inside = false, dm = Infinity;
+        for (let a = 0, b = p.length - 1; a < p.length; b = a++){
+          const [xa, ya] = p[a], [xb, yb] = p[b];
+          if ((ya > y) !== (yb > y) && x < (xb - xa) * (y - ya) / (yb - ya) + xa) inside = !inside;
+          const ex = xb - xa, ey = yb - ya, L = ex * ex + ey * ey, t = L ? Math.max(0, Math.min(1, ((x - xa) * ex + (y - ya) * ey) / L)) : 0;
+          dm = Math.min(dm, Math.hypot(x - xa - t * ex, y - ya - t * ey));
+        }
+        if (inside && dm > r) r = dm;
+      }
+      return r;
+    }));
+  });
+  return {sheets: res ? res.r.map(x => ({items: x.items, used: x.used})) : null, err: res ? null : 'big', bridge, rin};
+}
+
+let CNCR = null, cncKey = '', cncT = 0, cncW = null, cncSeq = 0;
+function cncRun(jobs, cb){
+  const id = ++cncSeq, local = () => { const r = jobs.map(j => j && cncJob(j)); if (id === cncSeq) cb(r); };
+  if (cncW === false) return setTimeout(local, 0);
+  clearTimeout(cncRun.t);   // потік мовчить (буває у вбудованих переглядачах) — рахуємо тут
+  cncRun.t = setTimeout(() => { if (id === cncSeq && cncW){ cncW.terminate(); cncW = false; local(); } }, 8000);
+  try{
+    if (!cncW){   // рахунок іде в окремому потоці, щоб сторінка не підвисала
+      const src = `${cncJob}\nonmessage = e => postMessage({id: e.data.id, res: e.data.jobs.map(j => j && cncJob(j))});`;
+      cncW = new Worker(URL.createObjectURL(new Blob([src], {type: 'text/javascript'})));
+      cncW.onmessage = e => { if (e.data.id === cncSeq && cncW.cb){ clearTimeout(cncRun.t); cncW.cb(e.data.res); } };
+      cncW.onerror = e => { e.preventDefault(); clearTimeout(cncRun.t); const f = cncW.retry; cncW = false; f && f(); };
+    }
+    cncW.cb = cb; cncW.retry = local; cncW.postMessage({id, jobs});
+  }catch(e){ cncW = false; setTimeout(local, 0); }
+}
+function cncSpec(){
+  const front = !!(st.cnc.player === 'front' && STAR2);
+  return {front, c: front ? L2C() : cur(), D: Math.round(st.cnc.D * (front ? st.layer.s : 1)), vid: front ? st.layer.vid : st.vid};
+}
+function cncSchedule(now){
+  if (CNC_OFF) return;
+  $('#cn-player-g').hidden = !STAR2;
+  if (st.mode !== 'cnc') return;
+  clearTimeout(cncT); cncT = setTimeout(cncCompute, now ? 0 : 250);
+}
+function cncCompute(){
+  const sp = cncSpec(), [W, H] = SHEETS[st.cnc.sheet], {gap, edge, bridge} = st.cnc;
+  const key = JSON.stringify([sp.c, sp.D, W, H, gap, edge, bridge]);
+  if (key === cncKey && CNCR) return cncDraw();
+  cncKey = key;
+  // перемичка в одиницях геометрії (радіус 1200 — це половина діаметра) з невеликим запасом на точність підбору прорізів
+  const b = bridge * 1.08 * 2400 / sp.D, star = buildStar({...sp.c, margin: Math.max(24, b), seam: Math.max(14, b), hg: b}), s = sp.D / 2400, N = star.N;
+  const mm = pc => ({pts: pc.outline.map(p => [p[0] * s, p[1] * s]), holes: pc.holes.map(h => h.t === 'c' ? {c: [h.c[0] * s, h.c[1] * s], r: h.r * s} : {pts: h.pts.map(p => [p[0] * s, p[1] * s])})});
+  const parts = {};
+  Object.keys(CPARTS).forEach(k => {
+    const n = k === 'full' ? 1 : k === 'half' ? 2 : k === 'quarter' ? 4 : N;
+    if (N % n) return;
+    const two = n > 1 && star.alt && (N / n) % 2, pcs = two ? [piece(star, n, 0, false), piece(star, n, 1, false)] : [piece(star, n, 0, false)];
+    parts[k] = {n, pcs, counts: two ? [Math.ceil(n / 2), Math.floor(n / 2)] : [n]};
+  });
+  const keys = Object.keys(parts);
+  $('#cn-sheets').classList.add('busy');
+  cncRun(keys.map(k => ({W, H, gap, edge, types: parts[k].pcs.map((pc, i) => ({...mm(pc), count: parts[k].counts[i]}))})), res => {
+    keys.forEach((k, i) => parts[k].res = res[i]);
+    CNCR = {sp, s, W, H, star, parts};
+    $('#cn-sheets').classList.remove('busy');
+    cncDraw();
+  });
+}
+function cncPlace(it, pc, s){
+  const c = Math.cos(it.a), n = Math.sin(it.a), f = p => [(p[0] * c - p[1] * n) * s + it.x, (p[0] * n + p[1] * c) * s + it.y];
+  return {o: pc.outline.map(f), h: pc.holes.map(h => h.t === 'c' ? Cc(f(h.c), h.r * s) : P(h.pts.map(f)))};
+}
+function cncSel(){
+  if (!CNCR) return null;
+  const P0 = CNCR.parts, ok = k => P0[k] && !P0[k].res.err;
+  if (!ok(st.cnc.part)){   // ця частина недоступна — беремо ту, що дає найменше листів
+    const k = Object.keys(P0).filter(ok).sort((a, b) => P0[a].res.sheets.length - P0[b].res.sheets.length)[0];
+    if (k) st.cnc.part = k;
+  }
+  return P0[st.cnc.part] || null;
+}
+function cncDraw(){
+  if (CNC_OFF) return;
+  $('#cn-d-out').textContent = `Ø ${st.cnc.D}`;
+  $$('#cn-sheet .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.cnc.sheet));
+  $$('#cn-player .chip').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === st.cnc.player));
+  if (!CNCR) return;
+  const sel = cncSel(), {W, H, s, sp, star} = CNCR, mmT = tr('мм', 'mm');
+  $('#cn-part').innerHTML = Object.keys(CPARTS).map(k => {
+    const r = CNCR.parts[k], sub = !r ? tr('не ділиться', 'not divisible') : r.res.err ? tr('не вміщується', "doesn't fit") : sheetsTxt(r.res.sheets.length);
+    return `<button type="button" class="chip" data-k="${k}" aria-pressed="${k === st.cnc.part}"${r ? '' : ' disabled'}><span>${tr(...CPARTS[k])}<small>${sub}</small></span></button>`;
+  }).join('');
+  const notes = [], res = sel && sel.res;
+  if (!res || res.err){
+    $('#cn-sheets').innerHTML = `<p class="cnc-busy">${tr('Жодна частина не вміщується на лист навіть з поворотом.', 'No part fits on the sheet, even rotated.')}</p>`;
+    $('#cn-stats').innerHTML = '';
+    $('#cn-dxf').disabled = $('#cn-svg').disabled = true;
+    notes.push(tr('Допоможуть менші частини, більший лист або менший діаметр.', 'Smaller parts, a larger sheet or a smaller diameter can help.'));
+  } else {
+    const face = sp.c.face || '#dcc59b';
+    $('#cn-sheets').innerHTML = `<div class="cnc-sheets">${res.sheets.map((sh, i) => {
+      const body = sh.items.map(it => { const q = cncPlace(it, sel.pcs[it.t], s); return shD(P(q.o)) + q.h.map(shD).join(''); }).join('');
+      const cap = tr(`Лист ${i + 1} · деталей ${sh.items.length} · зайнято ${sh.used} з ${H} мм`, `Sheet ${i + 1} · ${sh.items.length} ${sh.items.length === 1 ? 'part' : 'parts'} · ${sh.used} of ${H} mm used`);
+      return `<figure class="cnc-sheet"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${cap}"><rect width="${W}" height="${H}" fill="#cdb68f"/>` +
+        `<path d="${body}" fill-rule="evenodd" fill="${face}" stroke="#24170c" stroke-width="${f1(W / 260)}"/></svg>` +
+        `<figcaption>${cap}<span><button type="button" data-i="${i}" data-f="dxf">DXF</button> <button type="button" data-i="${i}" data-f="svg">SVG</button></span></figcaption></figure>`;
+    }).join('')}</div>`;
+    $('#cn-dxf').disabled = $('#cn-svg').disabled = false;
+    let net = 0, cut = 0, holes = 0, narrow = 0;
+    sel.pcs.forEach((pc, i) => {
+      const k = sel.counts[i] * s * s;
+      net += (area(pc.outline) - pc.holes.reduce((a, h) => a + shArea(h), 0)) * k;
+      cut += (perim(pc.outline) + pc.holes.reduce((a, h) => a + shPerim(h), 0)) * s * sel.counts[i];
+      holes += pc.holes.length * sel.counts[i];
+      narrow += res.rin[i].filter(r => 2 * r < st.cnc.tool - 0.05).length * sel.counts[i];
+    });
+    const n = res.sheets.length, m2 = net / 1e6, use = 100 * net / (n * W * H), br = Math.floor(res.bridge);
+    const cnt = sel.pcs.length > 1 ? tr(`${sel.counts[0]} довгих і ${sel.counts[1]} коротких`, `${sel.counts[0]} long and ${sel.counts[1]} short`) : `×${sel.n}`;
+    $('#cn-stats').innerHTML = [`Ø ${sp.D} ${mmT}`, `${tr(...CPARTS[st.cnc.part]).toLowerCase()} ${cnt}`, `${sheetsTxt(n)} ${W}×${H}`,
+      `${tr('використання листів', 'sheet use')} ${Math.round(use)} %`, `${tr('фанера нетто', 'net plywood')} ${m2.toFixed(2)} ${tr('м²', 'm²')}`,
+      `≈ ${(m2 * st.cnc.th * 0.65).toFixed(1)} ${tr('кг', 'kg')}`, `${tr('різ', 'cut')} ${Math.round(cut / 1000)} ${tr('м', 'm')}`,
+      `${tr('прорізів', 'holes')} ${holes}`, `${tr('найвужча перемичка', 'narrowest bridge')} ${br} ${mmT}`].map(t => `<span>${t}</span>`).join('');
+    if (br < st.cnc.bridge - 1) notes.push(tr(`Найвужча перемичка — ${br} мм, тонша за задані ${st.cnc.bridge} мм: так стоять прорізи всередині мотиву. Допоможуть більший діаметр або менша ажурність.`,
+      `The narrowest bridge is ${br} mm, thinner than the set ${st.cnc.bridge} mm: that is how the cutouts sit inside the motif. A larger diameter or less openwork can help.`));
+    if (narrow) notes.push(tr(`${narrow} ${plural(narrow, 'проріз вужчий', 'прорізи вужчі', 'прорізів вужчі')} за фрезу Ø${st.cnc.tool} мм, точно їх не вирізати. Допоможуть менша фреза, більший діаметр або менша ажурність.`,
+      `${narrow} ${narrow === 1 ? 'cutout is' : 'cutouts are'} narrower than the Ø${st.cnc.tool} mm bit and cannot be cut precisely. A smaller bit, a larger diameter or less openwork can help.`));
+  }
+  $('#cn-note').hidden = !notes.length; $('#cn-note').textContent = notes.join(' ');
+}
+function cncFile(kind, only){
+  const sel = cncSel(); if (!sel || sel.res.err) return;
+  const {W, H, s, sp} = CNCR, list = sel.res.sheets.map((sh, i) => [sh, i]).filter(([, i]) => only == null || i === only), G = 100;
+  const pieces = (sh, dx) => sh.items.map(it => { const q = cncPlace(it, sel.pcs[it.t], s); return {o: q.o.map(p => [p[0] + dx, p[1]]), h: q.h.map(h => shMap(h, p => [p[0] + dx, p[1]]))}; });
+  const name = `zvizda_${sp.vid}${sp.front ? '_shar2' : ''}_D${sp.D}_${st.cnc.part}_${st.cnc.sheet}` + (only == null ? (list.length > 1 ? '_usi_arkushi' : '') : `_arkush${only + 1}`);
+  const TW = list.length * W + (list.length - 1) * G;
+  if (kind === 'dxf'){
+    const o = ['0', 'SECTION', '2', 'ENTITIES'], y = v => (H - v).toFixed(2);
+    const pl = (pts, layer) => { o.push('0', 'POLYLINE', '8', layer, '66', '1', '70', '1'); pts.forEach(p => o.push('0', 'VERTEX', '8', layer, '10', p[0].toFixed(2), '20', y(p[1]))); o.push('0', 'SEQEND', '8', layer); };
+    list.forEach(([sh], j) => pieces(sh, j * (W + G)).forEach(q => {
+      pl(q.o, 'CONTOUR');
+      q.h.forEach(h => h.t === 'c' ? o.push('0', 'CIRCLE', '8', 'HOLES', '10', h.c[0].toFixed(2), '20', y(h.c[1]), '40', h.r.toFixed(2)) : pl(h.pts, 'HOLES'));
+    }));
+    o.push('0', 'ENDSEC', '0', 'EOF');
+    saveBlob(new Blob([o.join('\n') + '\n'], {type: 'application/dxf'}), name + '.dxf');
+  } else {
+    const body = list.map(([sh], j) => `<rect x="${j * (W + G)}" y="0" width="${W}" height="${H}" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="20 10"/>` +
+      pieces(sh, j * (W + G)).map(q => `<path d="${shD(P(q.o))}" fill="none" stroke="#000" stroke-width="0.5"/>` + q.h.map(h => `<path d="${shD(h)}" fill="none" stroke="#e00" stroke-width="0.5"/>`).join('')).join('')).join('\n');
+    saveBlob(new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${TW}mm" height="${H}mm" viewBox="0 0 ${TW} ${H}">\n<title>${name}</title>\n${body}\n</svg>\n`], {type: 'image/svg+xml'}), name + '.svg');
+  }
+  track('download-cnc-' + kind, kind === 'dxf' ? 'Завантаження DXF для ЧПК' : 'Завантаження SVG для ЧПК');
+}
+// на сайті розділу для ЧПК немає: збірка вирізає його розмітку й вмикає CNC_OFF
+const CNC_OFF = false;
+function setMode(m){
+  if (CNC_OFF) return;
+  st.mode = m; save();
+  $$('#mode .tab').forEach(b => b.setAttribute('aria-selected', b.dataset.m === m));
+  $$('#vykrijka [data-mode]').forEach(el => el.hidden = el.dataset.mode !== m);
+  if (m === 'cnc') cncSchedule(true);
+}
+function initCnc(){
+  if (CNC_OFF){ st.mode = 'paper'; return; }
+  $('#cn-sheet').innerHTML = Object.keys(SHEETS).map(k => `<button type="button" class="chip" data-k="${k}">${SHEETS[k].join('×')}</button>`).join('');
+  $('#cn-player').innerHTML = '<button type="button" class="chip" data-k="back">Задній шар</button><button type="button" class="chip" data-k="front">Другий шар</button>';
+  $$('#cn-sheet .chip').forEach(b => b.addEventListener('click', () => { st.cnc.sheet = b.dataset.k; save(); cncDraw(); cncSchedule(true); }));
+  $$('#cn-player .chip').forEach(b => b.addEventListener('click', () => { st.cnc.player = b.dataset.k; save(); cncDraw(); cncSchedule(true); }));
+  $('#cn-part').addEventListener('click', e => { const b = e.target.closest('.chip'); if (b && !b.disabled){ st.cnc.part = b.dataset.k; save(); cncDraw(); } });
+  $('#cn-sheets').addEventListener('click', e => { const b = e.target.closest('button[data-f]'); if (b) cncFile(b.dataset.f, +b.dataset.i); });
+  $('#cn-d').value = st.cnc.D;
+  $('#cn-d').addEventListener('input', e => { st.cnc.D = +e.target.value; save(); $('#cn-d-out').textContent = `Ø ${st.cnc.D}`; cncSchedule(); });
+  [['th', 'cn-th', false], ['tool', 'cn-tool', false], ['gap', 'cn-gap', true], ['edge', 'cn-edge', true], ['bridge', 'cn-bridge', true]].forEach(([k, id, re]) => {
+    const el = $('#' + id); el.value = st.cnc[k];
+    el.addEventListener('change', () => {
+      const v = +el.value; if (!isFinite(v) || v < +el.min || v > +el.max){ el.value = st.cnc[k]; return; }
+      st.cnc[k] = v; save(); re ? cncSchedule(true) : cncDraw();
+    });
+  });
+  $('#cn-dxf').addEventListener('click', () => cncFile('dxf'));
+  $('#cn-svg').addEventListener('click', () => cncFile('svg'));
+  $$('#mode .tab').forEach(b => b.addEventListener('click', () => setMode(b.dataset.m)));
+  setMode(st.mode);
 }
 
 /* ================= обертання ================= */
@@ -1298,8 +1939,9 @@ function drag(){
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
 }
 
-load(); buildUI(); renderNow(); initSpin(); drag();
-$$('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.l, true)));
+load(); loadMine(); { const h0 = parseHash(); if (h0.star) openLinked(h0.star); }
+buildUI(); initMine(); initCnc(); renderNow(); syncHash(); initSpin(); drag();
+$$('.lang button').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.l, true); save(); }));
 setLang(LANG);
 addEventListener('pagehide', saveNow); $('#b-auto').textContent = st.auto ? 'Пауза' : 'Крутити'; requestAnimationFrame(tick);
 </script>
