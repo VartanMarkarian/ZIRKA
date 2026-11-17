@@ -313,6 +313,7 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
             <label class="field" for="zl-base">Довжина · <output id="zl-base-out"></output><input type="range" id="zl-base" min="40" max="200" step="5" value="100"></label>
             <label class="field" for="zw-base">Ширина · <output id="zw-base-out"></output><input type="range" id="zw-base" min="30" max="100" step="5" value="100"></label>
             <label class="field" for="zn-base">Повтор<select id="zn-base"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+            <label class="field" for="zc-base" id="zc-base-f">До центру · <output id="zc-base-out"></output><input type="range" id="zc-base" min="0" max="100" step="5" value="0"></label>
           </div>
         </div>
         <div class="zx" id="zx-tip">
@@ -369,6 +370,7 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
               <label class="field" for="l-zl-base">Довжина · <output id="l-zl-base-out"></output><input type="range" id="l-zl-base" min="40" max="200" step="5" value="100"></label>
               <label class="field" for="l-zw-base">Ширина · <output id="l-zw-base-out"></output><input type="range" id="l-zw-base" min="30" max="100" step="5" value="100"></label>
               <label class="field" for="l-zn-base">Повтор<select id="l-zn-base"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+              <label class="field" for="l-zc-base" id="l-zc-base-f">До центру · <output id="l-zc-base-out"></output><input type="range" id="l-zc-base" min="0" max="100" step="5" value="0"></label>
             </div>
           </div>
           <div class="zx" id="l-zx-tip">
@@ -729,9 +731,11 @@ function buildStar(spec){
   const zoneRange = (name, Rk) => { const L = Rk - xv;
     if (name === 'center') return [rclear + 4, xv - gap * .6];
     // основа росте від серцевини до кінчика; кінчик — від свого краю до серцевини, але не заходить на проріз основи
+    // без прорізу в серцевині проріз основи може заходити в неї — аж до кріплення в центрі (повзунок «До центру»)
+    const hub = rclear + 4, free = !spec.z.center || spec.z.center === 'none';
     const bEnd = xv + Math.min(0.42 * L * zq('base', 'l', 1), 0.95 * L);
-    if (name === 'base') return [xv + gap, bEnd];
-    const end = Rk - 0.1 * L, len = (0.48 * L - gap) * zq('tip', 'l', 1), lo = spec.z.base && spec.z.base !== 'none' ? bEnd + gap : xv + gap;
+    if (name === 'base') return [xv + gap - (free ? zq('base', 'c', 0) * (xv + gap - hub) : 0), bEnd];
+    const end = Rk - 0.1 * L, len = (0.48 * L - gap) * zq('tip', 'l', 1), lo = spec.z.base && spec.z.base !== 'none' ? bEnd + gap : free ? hub : xv + gap;
     return [Math.max(end - len, lo), end]; };
   const zoneHoles = (name, kind, Rk, hp) => zone(kind, ...zoneRange(name, Rk), Rk, hp, zq(name, 'n', 1), zq(name, 'w', 1));
   function rayHoles(Rk){
@@ -848,7 +852,7 @@ const st = {vid: 'rozetka', slot: null, edits: {}, fmt: 'A4', part: 'full', tab:
             layer: {on: false, vid: 'myhdal', s: 0.55, mode: 'counter', link: true, pal: null, face: null, rim: null, edge: null, halo: 44, shadow: 2, geo: {}}, a: 0, v: 0, auto: !reduce, drag: null};
 const base = id => VARIANTS.find(v => v.id === id);
 const ZXK = ['base', 'tip'];
-const zxOf = q => Object.fromEntries(ZXK.map(k => [k, Object.assign({l: 1, w: 1, n: 1}, q && q[k])]));
+const zxOf = q => Object.fromEntries(ZXK.map(k => [k, Object.assign({l: 1, w: 1, n: 1, c: 0}, q && q[k])]));
 function cur(){ return cfg(st.vid, st.edits[st.vid] || {}); }
 function cfg(vid, e){   // основа зі змінами: готові налаштування звізди
   const b = base(vid), p = PALS[b.pal];
@@ -890,6 +894,7 @@ function cleanEdits(e, geoOnly){
       if ((v = num(q.l, .4, 2)) != null) r.l = v;
       if ((v = num(q.w, .3, 1)) != null) r.w = v;
       if ([1, 2, 3].includes(q.n)) r.n = q.n;
+      if ((v = num(q.c, 0, 1)) != null) r.c = v;
       if (Object.keys(r).length) zx[k] = r; });
     if (Object.keys(zx).length) o.zx = zx;
   }
@@ -1153,6 +1158,7 @@ const EN = {
 "Довжина ·": "Length ·",
 "Ширина ·": "Width ·",
 "Повтор": "Repeat",
+"До центру ·": "Toward center ·",
 "один": "once",
 "два": "twice",
 "три": "three times",
@@ -1556,6 +1562,8 @@ function bindZx(pre, get, put){
     $('#' + pre + 'zw-' + k).addEventListener('input', e => set('w', +e.target.value / 100));
     $('#' + pre + 'zn-' + k).addEventListener('change', e => set('n', +e.target.value));
   });
+  $('#' + pre + 'zc-base').addEventListener('input', e => set0('c', +e.target.value / 100));
+  function set0(f, v){ const zx = zxOf(get()); zx.base[f] = v; put({zx}); }
 }
 function showZx(pre, c){
   ZXK.forEach(k => {
@@ -1565,6 +1573,10 @@ function showZx(pre, c){
     $('#' + pre + 'zw-' + k).value = pc(q.w); $('#' + pre + 'zw-' + k + '-out').textContent = pc(q.w) + ' %';
     const sel = $('#' + pre + 'zn-' + k); sel.value = String(q.n); sel.disabled = !!MOTIF[m]?.chain;   // ланцюжок уже має три прорізи
   });
+  // «До центру» — лише коли серцевина без прорізу: тоді проріз основи може в неї заходити
+  const qb = c.zx.base, pc = v => Math.round(v * 100);
+  $('#' + pre + 'zc-base-f').hidden = !!c.z.center && c.z.center !== 'none';
+  $('#' + pre + 'zc-base').value = pc(qb.c); $('#' + pre + 'zc-base-out').textContent = pc(qb.c) + ' %';
 }
 let STAR = null, drawn = null;
 const STARS = new Map();

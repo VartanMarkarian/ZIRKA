@@ -108,6 +108,7 @@ EN = {
     "Довжина ·": "Length ·",
     "Ширина ·": "Width ·",
     "Повтор": "Repeat",
+    "До центру ·": "Toward center ·",
     "один": "once",
     "два": "twice",
     "три": "three times",
