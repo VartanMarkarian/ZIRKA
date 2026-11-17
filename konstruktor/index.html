@@ -121,6 +121,8 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
 :is(button,select,input):focus-visible{outline:2px solid var(--ochre);outline-offset:2px}
 .desc{font-size:.93rem;max-width:64ch;color:var(--muted)}
 .desc b{font-weight:600;color:var(--ink)}
+.zx{display:grid;gap:8px;margin-top:4px}
+.zx .row{align-items:end}
 .znote{font-size:.84rem;color:var(--red);margin:0}
 .stats{display:flex;flex-wrap:wrap;gap:8px}
 .stats span{font:500 .78rem/1 var(--f-mono);padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);font-variant-numeric:tabular-nums}
@@ -305,6 +307,22 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
         </div>
         <div class="label"><label for="ajur">Ажурність</label><output id="ajur-out"></output></div>
         <input type="range" id="ajur" min="40" max="100" step="5" value="100">
+        <div class="zx" id="zx-base">
+          <div class="label">Прорізи основи променя</div>
+          <div class="row">
+            <label class="field" for="zl-base">Довжина · <output id="zl-base-out"></output><input type="range" id="zl-base" min="40" max="200" step="5" value="100"></label>
+            <label class="field" for="zw-base">Ширина · <output id="zw-base-out"></output><input type="range" id="zw-base" min="30" max="100" step="5" value="100"></label>
+            <label class="field" for="zn-base">Повтор<select id="zn-base"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+          </div>
+        </div>
+        <div class="zx" id="zx-tip">
+          <div class="label">Прорізи кінчика променя</div>
+          <div class="row">
+            <label class="field" for="zl-tip">Довжина · <output id="zl-tip-out"></output><input type="range" id="zl-tip" min="40" max="200" step="5" value="100"></label>
+            <label class="field" for="zw-tip">Ширина · <output id="zw-tip-out"></output><input type="range" id="zw-tip" min="30" max="100" step="5" value="100"></label>
+            <label class="field" for="zn-tip">Повтор<select id="zn-tip"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+          </div>
+        </div>
         <p class="znote" id="z-note" hidden></p>
       </div>
 
@@ -345,6 +363,22 @@ input[type="range"]{width:100%;accent-color:var(--red);margin:0}
           </div>
           <div class="label"><label for="l-ajur">Ажурність</label><output id="l-ajur-out"></output></div>
           <input type="range" id="l-ajur" min="40" max="100" step="5" value="100">
+          <div class="zx" id="l-zx-base">
+            <div class="label">Прорізи основи променя</div>
+            <div class="row">
+              <label class="field" for="l-zl-base">Довжина · <output id="l-zl-base-out"></output><input type="range" id="l-zl-base" min="40" max="200" step="5" value="100"></label>
+              <label class="field" for="l-zw-base">Ширина · <output id="l-zw-base-out"></output><input type="range" id="l-zw-base" min="30" max="100" step="5" value="100"></label>
+              <label class="field" for="l-zn-base">Повтор<select id="l-zn-base"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+            </div>
+          </div>
+          <div class="zx" id="l-zx-tip">
+            <div class="label">Прорізи кінчика променя</div>
+            <div class="row">
+              <label class="field" for="l-zl-tip">Довжина · <output id="l-zl-tip-out"></output><input type="range" id="l-zl-tip" min="40" max="200" step="5" value="100"></label>
+              <label class="field" for="l-zw-tip">Ширина · <output id="l-zw-tip-out"></output><input type="range" id="l-zw-tip" min="30" max="100" step="5" value="100"></label>
+              <label class="field" for="l-zn-tip">Повтор<select id="l-zn-tip"><option value="1">один</option><option value="2">два</option><option value="3">три</option></select></label>
+            </div>
+          </div>
           <div class="label">Кольори другої звізди</div>
           <div class="chips" id="l-pals"></div>
           <div class="row">
@@ -619,6 +653,8 @@ const PROFILES = {
 function buildStar(spec){
   const N = spec.N, half = Math.PI / N, rin = spec.rin * R, alt = spec.alt ? spec.alt * R : 0;
   const prof = PROFILES[spec.prof] || PROFILES.sharp, margin = spec.margin || 24, seam = spec.seam || 14, rclear = 0.2 * R, gap = Math.max(26, spec.hg || 0), ajur = spec.ajur ?? 1;
+  // довжина (l), ширина (w) й повтор (n) прорізів основи й кінчика променя; без них — як було
+  const zx = spec.zx || {}, zq = (k, f, d) => (zx[k] && zx[k][f]) || d;
   const tip = k => (alt && k % 2 === 1) ? Math.max(alt, rin * 1.25) : R;
   const xv = rin * Math.cos(half), yv = rin * Math.sin(half);
   function lensProfile(Rk){
@@ -655,7 +691,7 @@ function buildStar(spec){
     for (const sh of shapes) for (const [x, y] of smp(sh)) if (x < rclear || Math.abs(y) > hf(x, Rk, hp)) return false;
     return true;
   }
-  function fitOne(kind, x0, x1, Rk, hp){
+  function fitOne(kind, x0, x1, Rk, hp, w = 1){
     // обрізаємо зону там, де промінь вужчий за перемичку: видовжені мотиви доходять кінцями до меж зони
     const ok = x => hf(x, Rk, hp) > 6, step = (x1 - x0) / 40;
     while (x1 - x0 > 30 && !ok(x1)) x1 -= step;
@@ -665,31 +701,47 @@ function buildStar(spec){
     const gen = b => { const r = m.g(x0, x1, b, c); return r == null ? null : (Array.isArray(r) ? r : [r]); };
     let lo = 0, hi = m.cap * (x1 - x0), best = 0;
     for (let i = 0; i < 22; i++){ const mid = (lo + hi) / 2, s = gen(mid); if (s && fits(s, Rk, hp)){ best = mid; lo = mid; } else hi = mid; }
-    const b = best * ajur;
+    const b = best * ajur * w;
     if (b < 8) return [];
     return gen(b) || [];
   }
-  function zone(kind, x0, x1, Rk, hp){
+  function zone(kind, x0, x1, Rk, hp, n = 1, wd = 1){
     if (!kind || kind === 'none') return [];
     const m = MOTIF[kind];
     if (m && m.chain){
       const w = [0.42, 0.33, 0.25], L = x1 - x0 - 2 * gap; let x = x0, out = [];
-      m.chain.forEach((k, i) => { const len = L * w[i]; out = out.concat(fitOne(k, x, x + len, Rk, hp)); x += len + gap; });
+      m.chain.forEach((k, i) => { const len = L * w[i]; out = out.concat(fitOne(k, x, x + len, Rk, hp, wd)); x += len + gap; });
       return out;
     }
-    return fitOne(kind, x0, x1, Rk, hp);
+    if (n > 1){
+      // повтор: зона ділиться на однакові відрізки з перемичкою між ними; спершу відкидаються місця, де промінь завузький
+      const step = (x1 - x0) / 40;
+      while (x1 - x0 > 30 && hf(x1, Rk, hp) <= 6) x1 -= step;
+      while (x1 - x0 > 30 && hf(x0, Rk, hp) <= 6) x0 += step;
+      const len = (x1 - x0 - (n - 1) * gap) / n; let out = [];
+      if (len < 30) return out;
+      for (let i = 0; i < n; i++){ const a = x0 + i * (len + gap); out = out.concat(fitOne(kind, a, a + len, Rk, hp, wd)); }
+      return out;
+    }
+    return fitOne(kind, x0, x1, Rk, hp, wd);
   }
   const cache = {};
   const zoneRange = (name, Rk) => { const L = Rk - xv;
-    return name === 'center' ? [rclear + 4, xv - gap * .6] : name === 'base' ? [xv + gap, xv + 0.42 * L] : [xv + 0.42 * L + gap, Rk - 0.1 * L]; };
+    if (name === 'center') return [rclear + 4, xv - gap * .6];
+    // основа росте від серцевини до кінчика; кінчик — від свого краю до серцевини, але не заходить на проріз основи
+    const bEnd = xv + Math.min(0.42 * L * zq('base', 'l', 1), 0.95 * L);
+    if (name === 'base') return [xv + gap, bEnd];
+    const end = Rk - 0.1 * L, len = (0.48 * L - gap) * zq('tip', 'l', 1), lo = spec.z.base && spec.z.base !== 'none' ? bEnd + gap : xv + gap;
+    return [Math.max(end - len, lo), end]; };
+  const zoneHoles = (name, kind, Rk, hp) => zone(kind, ...zoneRange(name, Rk), Rk, hp, zq(name, 'n', 1), zq(name, 'w', 1));
   function rayHoles(Rk){
     if (cache[Rk]) return cache[Rk];
     const hp = halfProfile(Rk), z = spec.z;
-    const h = [].concat(...['center', 'base', 'tip'].map(n => zone(z[n], ...zoneRange(n, Rk), Rk, hp)));
+    const h = [].concat(...['center', 'base', 'tip'].map(n => zoneHoles(n, z[n], Rk, hp)));
     return cache[Rk] = h;
   }
   // чи вміщується мотив у зону довгого променя (для підказок у списках)
-  const fitsZone = (name, kind) => kind === 'none' || zone(kind, ...zoneRange(name, R), R, halfProfile(R)).length > 0;
+  const fitsZone = (name, kind) => kind === 'none' || zoneHoles(name, kind, R, halfProfile(R)).length > 0;
   const ang = k => -Math.PI / 2 + k * TAU / N;
   const hangCache = {};
   function hangHole(Rk){   // отвір для шнурка якомога ближче до кінчика, подалі від інших прорізів
@@ -795,10 +847,12 @@ const st = {vid: 'rozetka', slot: null, edits: {}, fmt: 'A4', part: 'full', tab:
   cnc: {D: 2400, sheet: '1220x2440', part: 'quarter', th: 10, tool: 6, gap: 12, edge: 10, bridge: 25, player: 'back'},
             layer: {on: false, vid: 'myhdal', s: 0.55, mode: 'counter', link: true, pal: null, face: null, rim: null, edge: null, halo: 44, shadow: 2, geo: {}}, a: 0, v: 0, auto: !reduce, drag: null};
 const base = id => VARIANTS.find(v => v.id === id);
+const ZXK = ['base', 'tip'];
+const zxOf = q => Object.fromEntries(ZXK.map(k => [k, Object.assign({l: 1, w: 1, n: 1}, q && q[k])]));
 function cur(){ return cfg(st.vid, st.edits[st.vid] || {}); }
 function cfg(vid, e){   // основа зі змінами: готові налаштування звізди
   const b = base(vid), p = PALS[b.pal];
-  return {N: e.N ?? b.N, rin: e.rin ?? b.rin, prof: e.prof ?? b.prof, alt: e.alt ?? b.alt, ajur: e.ajur ?? 1,
+  return {N: e.N ?? b.N, rin: e.rin ?? b.rin, prof: e.prof ?? b.prof, alt: e.alt ?? b.alt, ajur: e.ajur ?? 1, zx: zxOf(e.zx),
           z: Object.assign({}, b.z, e.z || {}), face: e.face ?? b.col?.[0] ?? p.face, rim: e.rim ?? b.col?.[1] ?? p.rim, edge: e.edge ?? b.col?.[1] ?? p.edge, rimw: e.rimw ?? 24, pal: e.pal ?? b.pal,
           deco: e.deco ?? 'none', dcol: e.dcol ?? '#c9a24a', dsize: e.dsize ?? 1, devery: e.devery ?? 'all', dhole: e.dhole ?? true};
 }
@@ -829,6 +883,15 @@ function cleanEdits(e, geoOnly){
     const z = {};
     ['center', 'base', 'tip'].forEach(k => { if (e.z[k] === 'none' || (typeof e.z[k] === 'string' && Object.hasOwn(MOTIF, e.z[k]))) z[k] = e.z[k]; });
     if (Object.keys(z).length) o.z = z;
+  }
+  if (e.zx && typeof e.zx === 'object'){
+    const zx = {};
+    ZXK.forEach(k => { const q = e.zx[k], r = {}; if (!q || typeof q !== 'object') return;
+      if ((v = num(q.l, .4, 2)) != null) r.l = v;
+      if ((v = num(q.w, .3, 1)) != null) r.w = v;
+      if ([1, 2, 3].includes(q.n)) r.n = q.n;
+      if (Object.keys(r).length) zx[k] = r; });
+    if (Object.keys(zx).length) o.zx = zx;
   }
   if (geoOnly) return o;
   if (typeof e.pal === 'string' && Object.hasOwn(PALS, e.pal)) o.pal = e.pal;
@@ -1085,6 +1148,14 @@ const EN = {
 "Основа променя": "Ray base",
 "Кінчик променя": "Ray tip",
 "Ажурність": "Openwork",
+"Прорізи основи променя": "Cutouts at the ray base",
+"Прорізи кінчика променя": "Cutouts at the ray tip",
+"Довжина ·": "Length ·",
+"Ширина ·": "Width ·",
+"Повтор": "Repeat",
+"один": "once",
+"два": "twice",
+"три": "three times",
 "серцевина": "center",
 "основа променя": "ray base",
 "кінчик променя": "ray tip",
@@ -1298,7 +1369,7 @@ const EN_RX = [
   [/^Ø звізди ([\d.,]+) см$/, 'star Ø $1 cm'],
   [/^(A\d) (\d+)×(\d+) мм$/, '$1 $2×$3 mm'],
   [/^вирізати (\d+) шт\.$/, (m, n) => `cut ${n} ${n === '1' ? 'piece' : 'pieces'}`],
-  [/^Не вміщується: (.*)\. Допоможуть .*$/, (m, l) => `Doesn't fit: ${l.split(', ').map(loc).join(', ')}. A simpler motif, fewer rays, a wider center or a convex ray shape can help.`],
+  [/^Не вміщується: (.*)\. Допоможуть .*$/, (m, l) => `Doesn't fit: ${l.split(', ').map(loc).join(', ')}. A simpler motif, a shorter base cutout, fewer repeats, fewer rays, a wider center or a convex ray shape can help.`],
   [/^«(.+)» у зоні «(.+)»$/, (m, a, b) => `“${loc(a)}” in the ${loc(b)} zone`],
   [/^«(.+)»$/, (m, a) => `“${loc(a)}”`],
   [/^(.+) ×(\d+)$/, (m, a, k) => `${loc(a)} ×${k}`],
@@ -1389,6 +1460,7 @@ function buildUI(){
   $('#alt').addEventListener('change', e => edit({alt: +e.target.value}));
   $('#rin').addEventListener('input', e => edit({rin: +e.target.value / 100}));
   $('#ajur').addEventListener('input', e => edit({ajur: +e.target.value / 100}));
+  bindZx('', () => cur().zx, edit);
   $('#rimw').addEventListener('input', e => edit({rimw: +e.target.value}));
   ['face', 'rim', 'edge'].forEach(c => $('#c-' + c).addEventListener('input', e => edit({[c]: e.target.value})));
   $('#pals').innerHTML = Object.entries(PALS).map(([k, p]) => `<button type="button" class="chip" data-k="${k}" title="${p.src}"><span class="sw"><i style="background:${p.face}"></i><i style="background:${p.rim}"></i><i style="background:${p.rim2}"></i></span>${p.n}</button>`).join('');
@@ -1458,6 +1530,7 @@ function buildUI(){
   $('#l-alt').addEventListener('change', e => G({alt: +e.target.value}));
   $('#l-rin').addEventListener('input', e => G({rin: +e.target.value / 100}));
   $('#l-ajur').addEventListener('input', e => G({ajur: +e.target.value / 100}));
+  bindZx('l-', () => L2C().zx, G);
   [['l-zc', 'center'], ['l-zb', 'base'], ['l-zt', 'tip']].forEach(([id, z]) => $('#' + id).addEventListener('change', e => G({z: Object.assign({}, st.layer.geo?.z, {[z]: e.target.value})})));
   $('#l-reset').addEventListener('click', () => L({geo: {}}));
   $('#l-mode').addEventListener('change', e => L({mode: e.target.value}));
@@ -1475,10 +1548,28 @@ function buildUI(){
   $$('#player .chip').forEach(b => b.addEventListener('click', () => { st.player = b.dataset.k; save(); renderSheet(); }));
 }
 
+// довжина, ширина й повтор прорізів основи й кінчика: однакові повзунки для основної звізди й другого шару
+function bindZx(pre, get, put){
+  ZXK.forEach(k => {
+    const set = (f, v) => { const zx = zxOf(get()); zx[k][f] = v; put({zx}); };
+    $('#' + pre + 'zl-' + k).addEventListener('input', e => set('l', +e.target.value / 100));
+    $('#' + pre + 'zw-' + k).addEventListener('input', e => set('w', +e.target.value / 100));
+    $('#' + pre + 'zn-' + k).addEventListener('change', e => set('n', +e.target.value));
+  });
+}
+function showZx(pre, c){
+  ZXK.forEach(k => {
+    const q = c.zx[k], m = c.z[k] || 'none', pc = v => Math.round(v * 100);
+    $('#' + pre + 'zx-' + k).hidden = m === 'none';
+    $('#' + pre + 'zl-' + k).value = pc(q.l); $('#' + pre + 'zl-' + k + '-out').textContent = pc(q.l) + ' %';
+    $('#' + pre + 'zw-' + k).value = pc(q.w); $('#' + pre + 'zw-' + k + '-out').textContent = pc(q.w) + ' %';
+    const sel = $('#' + pre + 'zn-' + k); sel.value = String(q.n); sel.disabled = !!MOTIF[m]?.chain;   // ланцюжок уже має три прорізи
+  });
+}
 let STAR = null, drawn = null;
 const STARS = new Map();
 function starOf(c){
-  const on = !!c.deco && c.deco !== 'none', k = JSON.stringify([c.N, c.rin, c.prof, c.alt, c.ajur, c.z, on && c.devery, on && c.dhole]);
+  const on = !!c.deco && c.deco !== 'none', k = JSON.stringify([c.N, c.rin, c.prof, c.alt, c.ajur, c.z, c.zx, on && c.devery, on && c.dhole]);
   let s = STARS.get(k);
   if (!s){
     s = buildStar(c);
@@ -1520,6 +1611,7 @@ function renderNow(){
   $('#n').value = c.N; $('#prof').value = c.prof; $('#alt').value = String(c.alt); if (![...$('#alt').options].some(o => o.value === String(c.alt))) $('#alt').value = '0';
   $('#rin').value = Math.round(c.rin * 100); $('#rin-out').textContent = Math.round(c.rin * 100) + ' % радіуса';
   $('#ajur').value = Math.round(c.ajur * 100); $('#ajur-out').textContent = Math.round(c.ajur * 100) + ' %';
+  showZx('', c);
   $('#rimw').value = c.rimw; $('#rimw-out').textContent = c.rimw ? (c.rimw / 2) + ' мм на Ø2400' : 'без обвідки';
   const miss = [];
   ['center', 'base', 'tip'].forEach(z => {
@@ -1527,7 +1619,7 @@ function renderNow(){
     sel.value = c.z[z] || 'none';
     if (!STAR.fit(z, sel.value)) miss.push(`«${MOTIF[sel.value].n}» у зоні «${ZONE_NAMES[z]}»`);
   });
-  $('#z-note').textContent = miss.length ? `Не вміщується: ${miss.join(', ')}. Допоможуть простіший мотив, менше променів, ширша серцевина або опукла форма променя.` : '';
+  $('#z-note').textContent = miss.length ? `Не вміщується: ${miss.join(', ')}. Допоможуть простіший мотив, коротший проріз основи, менше повторів, менше променів, ширша серцевина або опукла форма променя.` : '';
   $('#z-note').hidden = !miss.length;
   $('#c-face').value = c.face; $('#c-rim').value = c.rim; $('#c-edge').value = c.edge;
   const edited = !!st.edits[st.vid];
@@ -1621,7 +1713,7 @@ function harmony(m){
 function L2C(){   // налаштування звізди другого шару: її основа зі змінами з галереї й власні кольори шару
   const b = base(st.layer.vid), e = st.edits[b.id] || {}, p = PALS[e.pal ?? b.pal];
   const g = st.layer.geo || {};
-  return {N: g.N ?? e.N ?? b.N, rin: g.rin ?? e.rin ?? b.rin, prof: g.prof ?? e.prof ?? b.prof, alt: g.alt ?? e.alt ?? b.alt, ajur: g.ajur ?? e.ajur ?? 1,
+  return {N: g.N ?? e.N ?? b.N, rin: g.rin ?? e.rin ?? b.rin, prof: g.prof ?? e.prof ?? b.prof, alt: g.alt ?? e.alt ?? b.alt, ajur: g.ajur ?? e.ajur ?? 1, zx: zxOf(g.zx ?? e.zx),
           z: Object.assign({}, b.z, e.z || {}, g.z || {}),
           rimw: e.rimw ?? 24, ...(st.layer.link !== false
             ? harmony(cur())   // кольори другої звізди виводяться з кольорів основної
@@ -1652,6 +1744,7 @@ function renderLayer(){
     const sel = $('#' + id);
     sel.value = c2.z[z] || 'none';
   });
+  showZx('l-', c2);
   if (drawn2 !== STAR2){
     drawn2 = STAR2; labelZones();
     const d = starD(STAR2);
@@ -1859,7 +1952,7 @@ function cncJob(job){
   // шириною 3 мм відомі її верхній і нижній край, тож промінь однієї деталі заходить між променями іншої.
   // Перебираються кути повороту й положення; береться найнижче й найщільніше місце.
   const W = job.W, H = job.H, edge = job.edge, gap = job.gap, COL = 3;
-  const NC = Math.floor((W - 2 * edge) / COL), KK = Math.ceil(gap / COL);
+  const NC = Math.floor((W - 2 * edge) / COL), KK = Math.ceil(gap / COL), OXS = job.ox || 3;
   function dense(pts, step){
     const o = [];
     for (let i = 0; i < pts.length; i++){
@@ -1942,10 +2035,10 @@ function cncJob(job){
     };
     for (let deg = 0; deg < 360; deg += 5){
       const p = prof(bl, deg); if (!p) continue;
-      for (let ox = 0; ox + p.n <= NC; ox += 3) at(deg, ox);
+      for (let ox = 0; ox + p.n <= NC; ox += OXS) at(deg, ox);
       at(deg, NC - p.n);
     }
-    if (b){ const d0 = b.p.deg, o0 = b.ox; for (let dd = -4; dd <= 4; dd++) for (let o = -2; o <= 2; o++) at(d0 + dd, o0 + o); }
+    if (b){ const d0 = b.p.deg, o0 = b.ox; for (let dd = -4; dd <= 4; dd++) for (let o = 1 - OXS; o < OXS; o++) at(d0 + dd, o0 + o); }
     return b;
   }
   function pack(order, lam){
@@ -1959,7 +2052,7 @@ function cncJob(job){
         x.full.add(bl.key);   // далі лист лише заповнюється, тож такий блок туди вже не стане
       }
       if (!sh){
-        sh = {sky: new Float64Array(NC).fill(edge - gap), items: [], used: 0, full: new Set()};
+        sh = {sky: new Float64Array(NC).fill(edge - gap), items: [], used: 0, ux: 0, full: new Set()};
         sh.b = best(sh.sky, bl, lam); if (!sh.b) return null;
         sheets.push(sh);
       }
@@ -1967,6 +2060,7 @@ function cncJob(job){
       for (let ci = 0; ci < p.n; ci++){ const v = p.bot[ci] + b.dy; if (v > sh.sky[b.ox + ci]) sh.sky[b.ox + ci] = v; }
       bl.m.forEach(m => sh.items.push({t: m.t, a: m.a + p.a, x: tx + m.bx * c - m.by * s, y: ty + m.bx * s + m.by * c}));
       sh.used = Math.max(sh.used, Math.ceil(b.dy + p.h + edge));
+      sh.ux = Math.max(sh.ux, edge + (b.ox + p.n) * COL);   // зайнята ширина: потрібна, коли лист заповнюють упоперек
     }
     return sheets;
   }
@@ -1989,7 +2083,7 @@ function cncJob(job){
   });
   let res = null;
   for (const order of orders)
-    for (const lam of [0.3, 1.5, -1]){
+    for (const lam of job.lams || [0.3, 1.5, -1]){
       const r = pack(order, lam); if (!r) continue;
       const k = [r.length, r[r.length - 1].used, r.reduce((s, x) => s + x.used, 0)];
       if (!res || k[0] < res.k[0] || (k[0] === res.k[0] && (k[1] < res.k[1] || (k[1] === res.k[1] && k[2] < res.k[2])))) res = {k, r};
@@ -2027,18 +2121,32 @@ function cncJob(job){
       return r;
     }));
   });
-  return {sheets: res ? res.r.map(x => ({items: x.items, used: x.used})) : null, err: res ? null : 'big', bridge, rin};
+  return {sheets: res ? res.r.map(x => ({items: x.items, used: x.used, ux: x.ux})) : null, err: res ? null : 'big', bridge, rin};
+}
+function cncPick(job){
+  // лист заповнюється або вздовж, або впоперек (деталі «падають» з довгого боку); береться те, що дає менше листів,
+  // а за рівної кількості — менший зайнятий шмат останнього листа
+  const a = cncJob(job);
+  if (job.W === job.H) return a;
+  const b = cncJob({...job, W: job.H, H: job.W, ox: 6, lams: [0.3, -1]});   // упоперек колонок удвічі більше — грубіший крок
+  if (!b.sheets) return a;
+  // повернути розкладку на 90°: вісь заповнення стає довжиною листа
+  const bs = b.sheets.map(sh => ({items: sh.items.map(it => ({t: it.t, a: it.a + Math.PI / 2, x: job.W - it.y, y: it.x})), used: Math.ceil(sh.ux + job.edge), drop: sh.used}));
+  if (!a.sheets) return {...a, sheets: bs, err: null};
+  const last = (l, sw) => { const x = l[l.length - 1]; return sw ? x.used * x.drop : x.used * job.W; };
+  const ka = [a.sheets.length, last(a.sheets, false)], kb = [bs.length, last(bs, true)];
+  return kb[0] < ka[0] || (kb[0] === ka[0] && kb[1] < ka[1] * 0.97) ? {...a, sheets: bs} : a;
 }
 
 let CNCR = null, cncKey = '', cncT = 0, cncW = null, cncSeq = 0;
 function cncRun(jobs, cb){
-  const id = ++cncSeq, local = () => { const r = jobs.map(j => j && cncJob(j)); if (id === cncSeq) cb(r); };
+  const id = ++cncSeq, local = () => { const r = jobs.map(j => j && cncPick(j)); if (id === cncSeq) cb(r); };
   if (cncW === false) return setTimeout(local, 0);
   clearTimeout(cncRun.t);   // потік мовчить (буває у вбудованих переглядачах) — рахуємо тут
   cncRun.t = setTimeout(() => { if (id === cncSeq && cncW){ cncW.terminate(); cncW = false; local(); } }, 8000);
   try{
     if (!cncW){   // рахунок іде в окремому потоці, щоб сторінка не підвисала
-      const src = `${cncJob}\nonmessage = e => postMessage({id: e.data.id, res: e.data.jobs.map(j => j && cncJob(j))});`;
+      const src = `${cncJob}\n${cncPick}\nonmessage = e => postMessage({id: e.data.id, res: e.data.jobs.map(j => j && cncPick(j))});`;
       cncW = new Worker(URL.createObjectURL(new Blob([src], {type: 'text/javascript'})));
       cncW.onmessage = e => { if (e.data.id === cncSeq && cncW.cb){ clearTimeout(cncRun.t); cncW.cb(e.data.res); } };
       cncW.onerror = e => { e.preventDefault(); clearTimeout(cncRun.t); const f = cncW.retry; cncW = false; f && f(); };
